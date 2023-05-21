@@ -11,6 +11,10 @@ rANS::rANSCompressor::rANSCompressor() {
 	_cumul = { 0,3,6 };
 }
 
+rANS::rANSCompressor::rANSCompressor(SymbolInformation data) {
+	_data = data;
+}
+
 /// <summary>
 /// Default destructor.
 /// </summary>
@@ -94,4 +98,8 @@ int rANS::rANSCompressor::findNearestBin(int slot) {
 		iterator++;
 	}
 	return 0;
+}
+
+void rANS::rANSCompressor::printData() {
+	_data.printData();
 }

@@ -21,18 +21,12 @@
     <ClCompile Include="rANSCompressor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DataHolder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SymbolInformation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rANSCompressor.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DataHolder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SymbolInformation.hpp">

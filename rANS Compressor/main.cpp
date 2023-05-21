@@ -11,6 +11,7 @@ using namespace rANS;
 /* Links:
     - https://www.youtube.com/watch?v=6vNBLGKsssA&ab_channel=StanfordResearchTalks
     - https://kedartatwawadi.github.io/post--ANS/
+    - https://www.asciitable.com/
 */
 
 //Alphabet -> tablica wszystkich mo¿liwych do zakodowania symboli.
@@ -115,7 +116,7 @@ int main()
     std::cout << "Result: {" << results[0] << "," << results[1] << "," << results[2] << "," << results[3] << "}" << std::endl;
     std::cout << "-------------------- with Classes --------------------\n";
     std::cout << "rANS encoder input = { 1, 0, 2, 1 }\n";
-    rANSCompressor compressor = rANSCompressor();
+    rANSCompressor compressor;
     int classResult = compressor.encode(input, inputSize);
     std::cout << "Result: " << result << std::endl;
     std::cout << "rANS decoding: " << classResult << std::endl;
@@ -126,5 +127,10 @@ int main()
     std::cout << "-------------------- Data input --------------------\n";
     SymbolInformation info;
     info.loadData("D:\\Dev\\rANS Compressor\\Debug\\DATA.txt");
+    info.calculateMetric();
+    info.printData();
+    std::cout << "-------------------- rANSCompressor --------------------\n";
+    rANSCompressor second(info);
+    second.printData();
     std::cin.get();
 }
