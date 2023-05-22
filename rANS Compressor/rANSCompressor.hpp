@@ -14,7 +14,8 @@ namespace rANS {
 	*/
 	public:
 		rANSCompressor();
-		rANSCompressor(SymbolInformation data);
+		rANSCompressor(const SymbolInformation& data);
+		rANSCompressor(const SymbolInformation* data);
 		~rANSCompressor();
 
 		int encode(int* data, size_t dataSize);

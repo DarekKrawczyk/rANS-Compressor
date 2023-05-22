@@ -125,12 +125,16 @@ int main()
     compressor.decode(preEncoding);
     printResults(preEncoding);
     std::cout << "-------------------- Data input --------------------\n";
-    SymbolInformation info;
-    info.loadData("D:\\Dev\\rANS Compressor\\Debug\\DATA.txt");
-    info.calculateMetric();
-    info.printData();
+    SymbolInformation* info = new SymbolInformation();
+    info->loadData("D:\\Dev\\rANS Compressor\\Debug\\DATA.txt");
+    info->calculateMetric();
+    info->printData();
     std::cout << "-------------------- rANSCompressor --------------------\n";
-    rANSCompressor second(info);
+    SymbolInformation tt(*info);
+    tt.printData();
+    rANSCompressor second(tt);
     second.printData();
+    rANSCompressor third(info);
+    third.printData();
     std::cin.get();
 }

@@ -12,7 +12,8 @@ namespace rANS {
 	*/
 	public:
 		SymbolInformation();
-		SymbolInformation(SymbolInformation& other);
+		SymbolInformation(const SymbolInformation& other);
+		SymbolInformation(const SymbolInformation* other);
 		~SymbolInformation();
 
 		bool loadData(const std::string& path);

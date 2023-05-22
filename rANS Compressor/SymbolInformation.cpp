@@ -8,33 +8,45 @@ rANS::SymbolInformation::SymbolInformation() {
 	_cumul = new int[_alphabetSize] {0};
 }
 
-rANS::SymbolInformation::SymbolInformation(SymbolInformation& other) {
+rANS::SymbolInformation::SymbolInformation(const SymbolInformation* other) {
+	this->_M = other->_M;
+	this->_alphabetSize = other->_alphabetSize;
+	this->_bufferSize = other->_bufferSize;
+
+	//Creating deep copies.
+	this->_dataBuffer = other->_dataBuffer;
+	this->_alphabet = other->_alphabet;
+
+	_freq = new int[_alphabetSize];
+	for (int i = 0; i < _alphabetSize; i++) {
+		this->_freq[i] = other->_freq[i];
+	}
+
+	_cumul = new int[_alphabetSize];
+	for (int i = 0; i < _alphabetSize; i++) {
+		this->_cumul[i] = other->_cumul[i];
+
+	}
+}
+
+rANS::SymbolInformation::SymbolInformation(const SymbolInformation& other) {
 	this->_M = other._M;
 	this->_alphabetSize = other._alphabetSize;
 	this->_bufferSize = other._bufferSize;
 
+	//Creating deep copies.
 	this->_dataBuffer = other._dataBuffer;
-	//size_t dataBufferLength = strlen(other._dataBuffer) + 1;
-	//this->_dataBuffer = new char[dataBufferLength];
-	//strcpy_s(this->_dataBuffer, dataBufferLength, other._dataBuffer);
-
 	this->_alphabet = other._alphabet;
-	//size_t alphabetLength = strlen(other._alphabet) + 1;
-	//this->_alphabet = new char[alphabetLength];
-	//strcpy_s(this->_alphabet, alphabetLength, other._alphabet);
 
-	//size_t frequenciesLength = (sizeof(other._freq) / sizeof(other._freq[0]));
-	this->_freq = new int[_alphabetSize];
+	_freq = new int[_alphabetSize];
 	for (int i = 0; i < _alphabetSize; i++) {
 		this->_freq[i] = other._freq[i];
 	}
 
-	//size_t cumulLength = (sizeof(other._cumul) / sizeof(other._cumul[0]));
-	//this->_cumul = new int[cumulLength];
-	//memcpy(this->_cumul, other._cumul, cumulLength);
-	this->_cumul = new int[_alphabetSize];
+	_cumul = new int[_alphabetSize];
 	for (int i = 0; i < _alphabetSize; i++) {
-		this->_cumul[i] = other._freq[i];
+		this->_cumul[i] = other._cumul[i];
+
 	}
 }
 
@@ -79,7 +91,7 @@ void rANS::SymbolInformation::printData() {
 		std::cout << "Data buffer is empty!\n";
 	}
 	else {
-		std::cout << "---------- Data ---------\n";
+		std::cout << "\n------------------- Data begin --------------------\n";
 		//M
 		std::string M = "M = {" + std::to_string(_M) + "}\n";
 		std::cout << M;
@@ -89,46 +101,58 @@ void rANS::SymbolInformation::printData() {
 		std::cout << bufforSize;
 
 		//Data buffer
-		std::string result = "Buffor = {";
+		std::string result = "-------------------- Buffor --------------------\n";
 		for (int i = 0; i < _bufferSize; i++) {
 			char sign = _dataBuffer[i];
 			result += _dataBuffer[i];
 			result += (i + 1 == _bufferSize ? "" : ",");
+			if (i > 0 and i % 30 == 0) {
+				result += "\n";
+			}
 		}
-		result += "}\n";
+		result += "\n--------------------------------------------------\n\n\n";
 		std::cout << result;
 
 		//Alphabet
-		std::string alphabet = "Alphabet = {";
+		std::string alphabet = "-------------------- Alphabet --------------------\n";
 		for (int i = 0; i < _alphabetSize; i++) {
 			char sign = _alphabet[i];
 			alphabet += _alphabet[i];
 			alphabet += (i + 1 == _alphabetSize ? "" : ",");
+			if (i > 0 and i % 30 == 0) {
+				alphabet += "\n";
+			}
 		}
-		alphabet += "}\n";
+		alphabet += "\n--------------------------------------------------\n\n\n";
 		std::cout << alphabet;
 
-		//Alphabet
-		std::string freq = "Frequencies = {";
+		//Frequencies
+		std::string freq = "-------------------- Frequencies --------------------\n";
 		for (int i = 0; i < _alphabetSize; i++) {
-			char sign = _freq[i];
-			freq += _freq[i];
+			int sign = _freq[i];
+			freq += std::to_string(_freq[i]);
 			freq += (i + 1 == _alphabetSize ? "" : ",");
+			if (i > 0 and i % 30 == 0) {
+				freq += "\n";
+			}
 		}
-		freq += "}\n";
+		freq += "\n--------------------------------------------------\n\n\n";
 		std::cout << freq;
 
 		//Cumul
-		std::string cumul = "Cumul = {";
+		std::string cumul = "-------------------- Cumul --------------------\n";
 		for (int i = 0; i < _alphabetSize; i++) {
-			char sign = _freq[i];
-			cumul += _freq[i];
+			int sign = _cumul[i];
+			cumul += std::to_string(_cumul[i]);
 			cumul += (i + 1 == _alphabetSize ? "" : ",");
+			if (i > 0 and i % 30 == 0) {
+				cumul += "\n";
+			}
 		}
-		cumul += "}\n";
+		cumul += "\n--------------------------------------------------\n";
 		std::cout << cumul;
 
-		std::cout << "--------- Data end -------\n";
+		std::cout << "\n------------------- Data end----------------------\n\n\n";
 	}
 }
 

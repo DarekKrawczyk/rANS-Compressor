@@ -11,8 +11,12 @@ rANS::rANSCompressor::rANSCompressor() {
 	_cumul = { 0,3,6 };
 }
 
-rANS::rANSCompressor::rANSCompressor(SymbolInformation data) {
+rANS::rANSCompressor::rANSCompressor(const SymbolInformation &data) {
 	_data = data;
+}
+
+rANS::rANSCompressor::rANSCompressor(const SymbolInformation* data) {
+	_data = *data;
 }
 
 /// <summary>
