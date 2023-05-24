@@ -4,26 +4,36 @@
 /// Default constructor of rANS compressor.
 /// </summary>
 rANS::rANSCompressor::rANSCompressor() {
-	//TODO: Determine what are the _alphabet, _freq, _cumul and _M values.
-	_M = 8;
-	_alphabet = { 0,1,2 };
-	_freq = { 3,3,2 };
-	_cumul = { 0,3,6 };
+	//TODO: Determine what are the _alphabet, _FRQ, _CDF and _M values.
+	_outBufferIterator = 0;
+	_outBuffer = new uint8_t[10];
 }
 
 rANS::rANSCompressor::rANSCompressor(const SymbolInformation &data) {
 	_data = data;
+	_outBufferIterator = 0;
+	_outBuffer = new uint8_t[10];
 }
 
 rANS::rANSCompressor::rANSCompressor(const SymbolInformation* data) {
 	_data = *data;
+	_outBufferIterator = 0;
+	_outBuffer = new uint8_t[10];
 }
 
 /// <summary>
 /// Default destructor.
 /// </summary>
 rANS::rANSCompressor::~rANSCompressor() {
+	delete[] _outBuffer;
+}
 
+void rANS::rANSCompressor::write16bits() {
+	uint32_t value = _encoderState & _msk;
+	uint8_t value1 = value >> 8;
+	uint8_t value2 = value & (0xff);
+	_outBuffer[_outBufferIterator++] = value1;
+	_outBuffer[_outBufferIterator++] = value2;
 }
 
 /// <summary>
@@ -32,10 +42,20 @@ rANS::rANSCompressor::~rANSCompressor() {
 /// <param name="data">Array of data to encode.</param>
 /// <param name="dataSize">Size of array of data.</param>
 /// <returns>Returns data in encoded format.</returns>
-int rANS::rANSCompressor::encode(int* data, size_t dataSize) {
+int rANS::rANSCompressor::encode(const SymbolInformation& data) {
+	_data = data;
 	_encoderState = 0;
-	for (int i = 0; i < dataSize; i++) {
-		this->encodeStep(data[i]);
+	int size = _data.getBufferSize();
+	for (int i = 0; i < size; i++) {
+		this->encodeStep(_data.getBuffer(i));
+	}
+	while (_encoderState > 0) {
+		_outBuffer[_outBufferIterator++] = _encoderState & (0xff);
+		_encoderState >>= 8;
+	}
+	uint8_t result[10];
+	for (int i = 0; i < 10; i++) {
+		result[i] = _outBuffer[i];
 	}
 	return _encoderState;
 }
@@ -45,9 +65,20 @@ int rANS::rANSCompressor::encode(int* data, size_t dataSize) {
 /// </summary>
 /// <param name="symbol">Symbol to encode.</param>
 void rANS::rANSCompressor::encodeStep(int symbol) {
-	int blockID = floor(_encoderState / _freq[symbol]);
-	int slot = _cumul[symbol] + (_encoderState mod _freq[symbol]);
-	int nextState = (blockID * _M) + slot;
+	uint32_t freq = _data.getFrequencies(symbol);
+	uint32_t cumul = _data.getCumul(symbol);
+	uint32_t M = _data.getM();
+	uint32_t D = _data.getD();
+
+	//Renormalize
+	if (_encoderState >= (freq << D)) {
+		write16bits();
+		_encoderState >>= 16;
+	}
+
+	uint32_t blockID = floor(_encoderState / freq);
+	uint32_t slot = cumul + (_encoderState mod freq);
+	uint32_t nextState = (blockID * M) + slot;
 	_encoderState = nextState;
 }
 
@@ -59,6 +90,7 @@ void rANS::rANSCompressor::decode(std::list<int>& result) {
 	if (_encoderState <= 0) {
 		return;
 	}
+	//DONT USE THS FUNCTION, WHILE LOOP WILL GO FOR INFINITY 
 	else {
 		result.clear();
 		int iteration = 0;
@@ -82,26 +114,27 @@ void rANS::rANSCompressor::decode(int value, std::list<int>& result) {
 }
 
 int rANS::rANSCompressor::decodeStep() {
-	int blockID = floor(_encoderState / _M);
-	int slot = _encoderState mod _M;
+	int blockID = floor(_encoderState / _data.getM());
+	int slot = _encoderState mod _data.getM();
 	int symbol = this->findNearestBin(slot);
-	int nextState = blockID * _freq[symbol] + slot - _cumul[symbol];
+	int nextState = blockID * _data.getFrequencies(symbol) + slot - _data.getCumul(symbol);
 	_encoderState = nextState;
 	return symbol;
 }
 
 int rANS::rANSCompressor::findNearestBin(int slot) {
-	int iterator = 0;
-	for (auto cumul : _cumul) {
-		if (cumul == slot) {
-			return iterator;
-		}
-		else if (cumul > slot) {
-			return iterator - 1;
-		}
-		iterator++;
-	}
-	return 0;
+	return _data.findNearestBin(slot);
+	//int iterator = 0;
+	//for (auto cumul : _CDF) {
+	//	if (cumul == slot) {
+	//		return iterator;
+	//	}
+	//	else if (cumul > slot) {
+	//		return iterator - 1;
+	//	}
+	//	iterator++;
+	//}
+	//return 0;
 }
 
 void rANS::rANSCompressor::printData() {
