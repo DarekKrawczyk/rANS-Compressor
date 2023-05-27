@@ -3,7 +3,9 @@
 #include "rANSCompressor.hpp"
 #include <vector>
 #include <list>
-#include "string"
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "SymbolInformation.hpp"
 
 using namespace rANS;
@@ -16,24 +18,54 @@ using namespace rANS;
 
 int main()
 {
-    const size_t inputSize = 4;
-    int input[inputSize] = { 1, 0, 2, 1 };
-    int result = 0;
-    //std::cout << "Result: " << result << std::endl;
-
-    //std::cout << "rANS decoding: " << result << std::endl;
-    //const size_t size = 4;
-    //int results[size] = { 0,0,0,0 };
-    //decode(results, size, result);
-    //std::cout << "Result: {" << results[0] << "," << results[1] << "," << results[2] << "," << results[3] << "}" << std::endl;
+    std::string message = "102110211021";
+    std::string result = "";
     std::cout << "-------------------- with Classes --------------------\n";
     std::cout << "rANS encoder input = { 1, 0, 2, 1 }\n";
-    SymbolInformation testingData("102110211021");
+    SymbolInformation testingData(message);
     rANSCompressor compressor;
-    int classResult = compressor.encode(testingData);
+    result = compressor.encode(testingData);
     std::cout << "Result: " << result << std::endl;
-    std::cout << "rANS decoding: " << classResult << std::endl;
-    std::list<int> preEncoding;
+    //printf("Result: %s\n", result.c_str());
+
+    std::string decoded = compressor.decode(testingData, result);
+
+    //Save to file
+    std::ofstream file("result.txt"); 
+    if (file.is_open()) {
+        file << result; 
+        file.close(); 
+        std::cout << "String saved to file successfully." << std::endl;
+    }
+    else {
+        std::cout << "Unable to open the file." << std::endl;
+    }
+
+
+    std::ifstream checkFile("D:\\Dev\\rANS Compressor\\rANS Compressor\\result.txt");
+    std::string fileReadData;
+    if (checkFile.is_open()) {
+        char symbol;
+
+        while (checkFile.get(symbol)) {
+            fileReadData += symbol;
+        }
+
+        checkFile.close();
+
+        std::cout << "Data read from file: " << fileReadData << std::endl;
+    }
+    else {
+        std::cout << "Unable to open the file." << std::endl;
+    }
+
+    if (fileReadData == result) {
+        std::cout << "Encoded data and data red from from file is the same - GOOD!\n";
+    }
+    else {
+        std::cout << "Encoded data and data red from from file is NOT the same - BAD!\n";
+    }
+
     //compressor.decode(classResult, preEncoding);
     //compressor.decode(preEncoding);
     //printResults(preEncoding);

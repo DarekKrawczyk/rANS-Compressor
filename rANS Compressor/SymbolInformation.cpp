@@ -10,7 +10,7 @@ rANS::SymbolInformation::SymbolInformation() {
 
 	//Adding one because last element is the denominator
 	_CDF = new uint32_t[FRQ_SIZE + 1] {0};
-	_symbols = new uint8_t[scale]{ 0 };
+	//_symbols = new char[scale]{ 0 };
 }
 
 rANS::SymbolInformation::SymbolInformation(const std::string& dataBuffer) {
@@ -19,9 +19,9 @@ rANS::SymbolInformation::SymbolInformation(const std::string& dataBuffer) {
 	_M = 0;
 	_alphabetSize = FRQ_SIZE;
 	_alphabet = "";
-	_FRQ = new uint32_t[FRQ_SIZE] {10};
-	_CDF = new uint32_t[FRQ_SIZE + 1] {10};
-	_symbols = new uint8_t[scale]{ 0 };
+	_FRQ = new uint32_t[FRQ_SIZE] {0};
+	_CDF = new uint32_t[FRQ_SIZE + 1] {0};
+	//_symbols = new char[scale]{ 0 };
 	this->calculateMetric();
 }
 
@@ -260,6 +260,8 @@ void rANS::SymbolInformation::calculateMetric() {
 	//const size_t occurrences = 256;
 	//int occurrenceTab[occurrences] = { 0 };
 	for (int i = 0; i < _bufferSize; i++) {
+		int value = _dataBuffer[i];
+		int value2 = _FRQ[_dataBuffer[i]];
 		_FRQ[_dataBuffer[i]]++;
 	}
 
@@ -269,6 +271,11 @@ void rANS::SymbolInformation::calculateMetric() {
 	}
 
 	_M = _CDF[256];
+
+	int test[256];
+	for (int i = 0; i < 256; i++) {
+		test[i] = _FRQ[i];
+	}
 
 	// resample distribution based on cumulative freqs
 	for (int i = 1; i <= 256; i++)

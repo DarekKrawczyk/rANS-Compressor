@@ -18,25 +18,28 @@ namespace rANS {
 		rANSCompressor(const SymbolInformation* data);
 		~rANSCompressor();
 
-		int encode(const SymbolInformation& data);
+		std::string encode(const SymbolInformation& data);
+		std::string decode(const SymbolInformation& info, const std::string& encodedData);
+
 		void decode(int value, std::list<int>& result);
 		void decode(std::list<int>& result);
 
 		void printData();
-		//int encode(DataHolder data);
-		//DataHolder decode(int value);
 
 	private:
 		uint32_t _msk = pow(2, 16) - 1;
 		SymbolInformation _data;
-		uint32_t _outBufferIterator;
-		uint8_t* _outBuffer;
 		uint32_t _encoderState;
+		uint32_t _decoderState;
+		std::string _encodedBuffer;
+		std::string _decodedBuffer;
 
 	private:
 		void encodeStep(int symbol);
+		void decodeStepik();
 		int decodeStep();
 		int findNearestBin(int slot);
 		void write16bits();
+		uint32_t read16bits();
 	};
 }

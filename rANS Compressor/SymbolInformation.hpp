@@ -41,16 +41,18 @@ namespace rANS {
 		bool loadData(const std::string& path);
 		void calculateMetric();
 		void printData();
+
+		//JUST FOR TESTS
+		char _symbols[1<<14];
 	private:
 		uint32_t n = 14;
 		uint32_t scale = 1 << n;
 		uint32_t mask = (1u << n) - 1;
 
-		uint32_t _normalizationFactor = 16;
+		uint32_t _normalizationFactor = 23;
 		uint32_t RENORM_LOW = pow(2, _normalizationFactor);
 		uint32_t RENORM_HIGH = pow(2, 2*_normalizationFactor) - 1;
 
-		uint8_t* _symbols;
 		std::string _dataBuffer;
 		size_t _bufferSize;
 		std::string _alphabet;
