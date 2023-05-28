@@ -25,23 +25,32 @@ rANS::rANSCompressor::~rANSCompressor() {
 }
 
 void rANS::rANSCompressor::write16bits() {
-	uint32_t value = _encoderState & _msk;
-	char value1 = value >> 8;
-	char value2 = value & (0xff);
+	//uint32_t value = _encoderState & _msk;
+	//char value1 = value >> 8;
+	//char value2 = value & (0xff);
+	//_encodedBuffer += value2;
+	//_encodedBuffer += value1;	
+	uint32_t value = _encoderState & 0xff;
+	uint8_t value2 = value & (0xff);
 	_encodedBuffer += value2;
-	_encodedBuffer += value1;
 }
 
 uint32_t rANS::rANSCompressor::read16bits() {
+	//uint32_t temp = 0;
+	//uint8_t value22 = _encodedBuffer[_encodedBuffer.length() - 1];
+	//temp = (uint32_t)value22;
+	//_encodedBuffer.pop_back();
+	//uint8_t value222 = _encodedBuffer[_encodedBuffer.length() - 1];
+	//uint32_t temp2 = (uint32_t)value222;
+	//uint32_t result = temp + (temp2 << 8);
+	//_encodedBuffer.pop_back();
+
+
 	uint32_t temp = 0;
 	uint8_t value22 = _encodedBuffer[_encodedBuffer.length() - 1];
 	temp = (uint32_t)value22;
 	_encodedBuffer.pop_back();
-	uint8_t value222 = _encodedBuffer[_encodedBuffer.length() - 1];
-	uint32_t temp2 = (uint32_t)value222;
-	uint32_t result = temp + (temp2 << 8);
-	_encodedBuffer.pop_back();
-
+	uint32_t result = temp;
 
 	//char value1 = _encodedBuffer[_encodedBuffer.length() - 1];
 	//_encodedBuffer.pop_back();
@@ -75,17 +84,24 @@ std::string rANS::rANSCompressor::encode(const SymbolInformation& data) {
 	}
 
 	//Write state of encoder into buffer. _encoderState variable is uint32_t thus 4 bytes.
-	char symbol4 = ((_encoderState >> 24) & (0xff));
+
+	uint8_t symbol = (_encoderState & (0xff));
+	
+	_encoderState = (_encoderState >> 8);
+	uint8_t symbol2 = (_encoderState & (0xff));
+
+	_encoderState = (_encoderState >> 8);
+	uint8_t symbol3 = (_encoderState & (0xff));
+
+	_encoderState = (_encoderState >> 8);
+	uint8_t symbol4 = (_encoderState & (0xff));
+
 	_encodedBuffer += symbol4;
-
-	char symbol3 = ((_encoderState >> 16) & (0xff));
 	_encodedBuffer += symbol3;
-
-	char symbol2 = ((_encoderState >> 8) & (0xff));
 	_encodedBuffer += symbol2;
+	_encodedBuffer += symbol;
 
-	char symbol = (_encoderState & (0xff));
-		_encodedBuffer += symbol;
+	uint32_t what = _encoderState;
 
 	return _encodedBuffer;
 }
@@ -102,13 +118,16 @@ void rANS::rANSCompressor::encodeStep(int symbol) {
 
 	//Renormalize
 	//if (_encoderState >= (freq << D)) {
-	if (_encoderState >= (freq << D)) {
+	//if (_encoderState >= (freq << (32-14))) {
+	uint32_t codix = (freq << (32 - 14));
+	//uint32_t codix = ((((1u << 23) >> 14) << 8) * freq);
+	if (_encoderState >= codix) {
 		write16bits();
-		_encoderState >>= 16;
+		_encoderState >>= 8;
 	}
 
 	uint32_t blockID = floor(_encoderState / freq) * M;
-	uint32_t slot = 14 + (_encoderState mod freq);
+	uint32_t slot = (_encoderState mod freq);
 	//uint32_t nextState = (blockID * M) + slot;
 	uint32_t nextState = blockID + slot + cumul;
 	_encoderState = nextState;
@@ -121,25 +140,28 @@ std::string rANS::rANSCompressor::decode(const SymbolInformation& info, const st
 	_decoderState = 0;
 
 	//Initialize decoding - push last elenets of encoded data to decoder state;
-	char value = _encodedBuffer[_encodedBuffer.length() - 1];
+	uint8_t value = _encodedBuffer[_encodedBuffer.length() - 1];
 	_decoderState = value;
 	_encodedBuffer.pop_back();
-	char value2 = _encodedBuffer[_encodedBuffer.length() - 1];
+	uint8_t value2 = _encodedBuffer[_encodedBuffer.length() - 1];
 	_decoderState |= (value2 << 8);
 	_encodedBuffer.pop_back();
-	char value3 = _encodedBuffer[_encodedBuffer.length() - 1];
+	uint8_t value3 = _encodedBuffer[_encodedBuffer.length() - 1];
 	_decoderState |= (value3 << 16);
 	_encodedBuffer.pop_back();
-	char value4 = _encodedBuffer[_encodedBuffer.length() - 1];
+	uint8_t value4 = _encodedBuffer[_encodedBuffer.length() - 1];
 	_decoderState |= (value4 << 24);
 	_encodedBuffer.pop_back();
 
 
 	int size = _data.getBufferSize();
-	while(_decoderState != 0) {
+	for (int i = 0; i < size; i++) {
 		this->decodeStepik();
 	}
-	return "";
+	//while(_decoderState != 0) {
+	//	this->decodeStepik();
+	//}
+		return _decodedBuffer;
 }
 
 void rANS::rANSCompressor::decodeStepik() {
@@ -147,21 +169,31 @@ void rANS::rANSCompressor::decodeStepik() {
 	uint32_t mask = (1u << 14) - 1;
 	uint32_t bucket = (_decoderState & mask);
 	uint32_t symbol = _data._symbols[_decoderState & mask];
-	char found = (char)symbol;
+	uint8_t found = symbol;
 
 	_decodedBuffer.push_back(symbol);
 
-	int blockID = _decoderState >> 14;
-	int slot = _decoderState & mask;
-	int nextState = blockID * _data.getFrequencies(symbol) + slot - _data.getCumul(symbol);
+	uint32_t blockID = _decoderState >> 14;
+	uint32_t slot = _decoderState & mask;
+	uint32_t nextState = blockID * _data.getFrequencies(symbol) + slot - _data.getCumul(symbol);
 	_decoderState = nextState;
 
-	if (_decoderState < pow(2, 16)) {
-		if (_encodedBuffer.length() > 0) {
-			uint32_t bitsToAdd = read16bits();
-			uint32_t bitShifted = _decoderState << 16;
-			_decoderState = bitShifted + bitsToAdd;
-		}
+	uint32_t var = (1u << 23);
+	//if (_decoderState < pow(2, 16)) {
+	//if (_decoderState < var) {
+	//	if (_encodedBuffer.length() > 0) {
+	//		uint32_t bitsToAdd = read16bits();
+	//		uint32_t bitShifted = _decoderState << 8;
+	//		_decoderState = bitShifted + bitsToAdd;
+	//	}
+	//}	
+	// 
+	if (_decoderState < var) {
+		do {
+			uint8_t sign = _encodedBuffer[_encodedBuffer.length() - 1];
+			_encodedBuffer.pop_back();
+			_decoderState = (_decoderState << 8) | sign;
+		} while (_decoderState < var);
 	}
 }
 

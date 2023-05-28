@@ -18,7 +18,13 @@ using namespace rANS;
 
 int main()
 {
-    std::string message = "102110211021";
+    //std::string message = "102110211021";
+    //std::string message = "Ala ma kota a kot ma ale!";
+    //std::string message = "test";
+    std::string message = "testowankoxDDDDD";
+    //std::string message = "102110211021";
+
+    std::string messageRev = message;
     std::string result = "";
     std::cout << "-------------------- with Classes --------------------\n";
     std::cout << "rANS encoder input = { 1, 0, 2, 1 }\n";
@@ -28,43 +34,50 @@ int main()
     std::cout << "Result: " << result << std::endl;
     //printf("Result: %s\n", result.c_str());
 
+    std::reverse(messageRev.begin(), messageRev.end());
+    std::cout << messageRev << std::endl;
     std::string decoded = compressor.decode(testingData, result);
-
+    if (decoded == messageRev) {
+        std::cout << "Udało sie\n";
+    }
+    else {
+        std::cout << "Nie udało się!\n";
+    }
     //Save to file
-    std::ofstream file("result.txt"); 
-    if (file.is_open()) {
-        file << result; 
-        file.close(); 
-        std::cout << "String saved to file successfully." << std::endl;
-    }
-    else {
-        std::cout << "Unable to open the file." << std::endl;
-    }
+    //std::ofstream file("result.txt"); 
+    //if (file.is_open()) {
+    //    file << result; 
+    //    file.close(); 
+    //    std::cout << "String saved to file successfully." << std::endl;
+    //}
+    //else {
+    //    std::cout << "Unable to open the file." << std::endl;
+    //}
 
 
-    std::ifstream checkFile("D:\\Dev\\rANS Compressor\\rANS Compressor\\result.txt");
-    std::string fileReadData;
-    if (checkFile.is_open()) {
-        char symbol;
+    //std::ifstream checkFile("D:\\Dev\\rANS Compressor\\rANS Compressor\\result.txt");
+    //std::string fileReadData;
+    //if (checkFile.is_open()) {
+    //    char symbol;
 
-        while (checkFile.get(symbol)) {
-            fileReadData += symbol;
-        }
+    //    while (checkFile.get(symbol)) {
+    //        fileReadData += symbol;
+    //    }
 
-        checkFile.close();
+    //    checkFile.close();
 
-        std::cout << "Data read from file: " << fileReadData << std::endl;
-    }
-    else {
-        std::cout << "Unable to open the file." << std::endl;
-    }
+    //    std::cout << "Data read from file: " << fileReadData << std::endl;
+    //}
+    //else {
+    //    std::cout << "Unable to open the file." << std::endl;
+    //}
 
-    if (fileReadData == result) {
-        std::cout << "Encoded data and data red from from file is the same - GOOD!\n";
-    }
-    else {
-        std::cout << "Encoded data and data red from from file is NOT the same - BAD!\n";
-    }
+    //if (fileReadData == result) {
+    //    std::cout << "Encoded data and data red from from file is the same - GOOD!\n";
+    //}
+    //else {
+    //    std::cout << "Encoded data and data red from from file is NOT the same - BAD!\n";
+    //}
 
     //compressor.decode(classResult, preEncoding);
     //compressor.decode(preEncoding);
