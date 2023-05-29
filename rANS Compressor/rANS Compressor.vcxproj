@@ -131,11 +131,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CompressionDetails.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="rANSCompressor.cpp" />
     <ClCompile Include="SymbolInformation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CompressionDetails.hpp" />
     <ClInclude Include="rANSCompressor.hpp" />
     <ClInclude Include="SymbolInformation.hpp" />
   </ItemGroup>

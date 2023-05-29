@@ -1,10 +1,13 @@
 #pragma once
 #include "SymbolInformation.hpp"
+#include "CompressionDetails.hpp"
 #include <list>
 #include <math.h>
 #include <vector>
+#include <chrono>
 
-#define mod %
+// Implmenentation 1 - own, 0 - rygorous
+#define Implementation 0
 
 namespace rANS {
 	class rANSCompressor
@@ -14,32 +17,29 @@ namespace rANS {
 	*/
 	public:
 		rANSCompressor();
-		rANSCompressor(const SymbolInformation& data);
-		rANSCompressor(const SymbolInformation* data);
+		rANSCompressor(const SymbolInformation& info);
+		rANSCompressor(const SymbolInformation* info);
 		~rANSCompressor();
 
-		std::string encode(const SymbolInformation& data);
+		std::string encode(const SymbolInformation& info);
 		std::string decode(const SymbolInformation& info, const std::string& encodedData);
 
-		void decode(int value, std::list<int>& result);
-		void decode(std::list<int>& result);
-
 		void printData();
+		CompressionDetails getEncodingDetails() const;
+		CompressionDetails getDecodingDetails() const;
 
 	private:
-		uint32_t _msk = pow(2, 16) - 1;
-		SymbolInformation _data;
+		SymbolInformation _symbolInformation;
 		uint32_t _encoderState;
 		uint32_t _decoderState;
 		std::string _encodedBuffer;
 		std::string _decodedBuffer;
+		CompressionDetails _encodingDetails;
+		CompressionDetails _decodingDetails;
 
 	private:
-		void encodeStep(int symbol);
-		void decodeStepik();
-		int decodeStep();
-		int findNearestBin(int slot);
-		void write16bits();
-		uint32_t read16bits();
+		void encodeStep(uint32_t symbol);
+		void decodeStep();
+		uint8_t read8bits();
 	};
 }

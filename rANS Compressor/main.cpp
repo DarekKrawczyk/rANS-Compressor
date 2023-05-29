@@ -1,12 +1,11 @@
 ﻿#include <iostream>
-#include <math.h>
-#include "rANSCompressor.hpp"
-#include <vector>
-#include <list>
-#include <iostream>
 #include <fstream>
+#include <list>
+#include <vector>
 #include <string>
+#include <math.h>
 #include "SymbolInformation.hpp"
+#include "rANSCompressor.hpp"
 
 using namespace rANS;
 
@@ -21,88 +20,110 @@ int main()
     //std::string message = "102110211021";
     //std::string message = "Ala ma kota a kot ma ale!";
     //std::string message = "test";
-    std::string message = "testowankoxDDDDD";
-    //std::string message = "102110211021";
+    //std::string message = "testtesttest";
 
-    std::string messageRev = message;
-    std::string result = "";
-    std::cout << "-------------------- with Classes --------------------\n";
-    std::cout << "rANS encoder input = { 1, 0, 2, 1 }\n";
+    std::string message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    std::string encodedMessage = "";
+    std::string decodedMessage = "";
+
     SymbolInformation testingData(message);
     rANSCompressor compressor;
-    result = compressor.encode(testingData);
-    std::cout << "Result: " << result << std::endl;
-    //printf("Result: %s\n", result.c_str());
 
-    std::reverse(messageRev.begin(), messageRev.end());
-    std::cout << messageRev << std::endl;
-    std::string decoded = compressor.decode(testingData, result);
-    if (decoded == messageRev) {
-        std::cout << "Udało sie\n";
+    encodedMessage = compressor.encode(testingData);
+    decodedMessage = compressor.decode(testingData, encodedMessage);
+
+    std::cout << "------------------------- Message -------------------------\n";
+
+    //std::cout << "Input buffer: " << message << std::endl;
+    //std::cout<<std::endl;
+    //std::cout<<std::endl;
+
+    //std::cout << "Encoded buffer: " << encodedMessage << std::endl;
+    //std::cout << std::endl;
+    //std::cout << std::endl;
+
+    //std::cout << "Decoded buffer: " << decodedMessage << std::endl;
+    //std::cout << std::endl;
+    //std::cout << std::endl;
+
+    if (decodedMessage == message) {
+        std::cout << "Encoded and decoded succesfully!\n";
     }
     else {
-        std::cout << "Nie udało się!\n";
+        std::cout << "Something went wrong!\n";
     }
-    //Save to file
-    //std::ofstream file("result.txt"); 
-    //if (file.is_open()) {
-    //    file << result; 
-    //    file.close(); 
-    //    std::cout << "String saved to file successfully." << std::endl;
-    //}
-    //else {
-    //    std::cout << "Unable to open the file." << std::endl;
-    //}
+    
+    CompressionDetails messageEncodingDetails;
+    messageEncodingDetails = compressor.getEncodingDetails();
+    std::cout << "Message encoding time: " << messageEncodingDetails.getOperationTime() << "[s]" << std::endl;
+    std::cout << "Message encoding speed: " << messageEncodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
+    std::cout << "Message size after encoding: " << messageEncodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << std::endl;
 
+    CompressionDetails messageDecodingDetails;
+    messageDecodingDetails = compressor.getDecodingDetails();
+    std::cout << "Message decoding time: " << messageDecodingDetails.getOperationTime() << "[s]" << std::endl;
+    std::cout << "Message decoding speed: " << messageDecodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
+    std::cout << "Message size after decoding: " << messageDecodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << std::endl;
 
-    //std::ifstream checkFile("D:\\Dev\\rANS Compressor\\rANS Compressor\\result.txt");
-    //std::string fileReadData;
-    //if (checkFile.is_open()) {
-    //    char symbol;
+    double nom = messageDecodingDetails.getObjectSize();
+    double de = messageEncodingDetails.getObjectSize();
+    double messageCR = nom/de;
+    std::cout << "Message compression ratio: " << messageCR << std::endl;
 
-    //    while (checkFile.get(symbol)) {
-    //        fileReadData += symbol;
-    //    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "------------------------- From file -------------------------\n";
 
-    //    checkFile.close();
+    std::string path = "D:\\Dev\\rANS Compressor\\rANS Compressor\\result.txt";
+    std::string fileNormal = "";
+    std::string encodedFile = "";
+    std::string decodedFile = "";
+    SymbolInformation infoFromFile;
+    infoFromFile.loadDataFromFile(path);
+    fileNormal = infoFromFile.getBuffer();
+    rANSCompressor encoder;
+    encodedFile = encoder.encode(infoFromFile);
+    decodedFile = encoder.decode(infoFromFile, encodedFile);
 
-    //    std::cout << "Data read from file: " << fileReadData << std::endl;
-    //}
-    //else {
-    //    std::cout << "Unable to open the file." << std::endl;
-    //}
+    //std::cout << "Input buffer: " << fileNormal << std::endl;
+    //std::cout << std::endl;
+    //std::cout << std::endl;
 
-    //if (fileReadData == result) {
-    //    std::cout << "Encoded data and data red from from file is the same - GOOD!\n";
-    //}
-    //else {
-    //    std::cout << "Encoded data and data red from from file is NOT the same - BAD!\n";
-    //}
+    //std::cout << "Encoded buffer: " << encodedMessage << std::endl;
+    //std::cout << std::endl;
+    //std::cout << std::endl;
 
-    //compressor.decode(classResult, preEncoding);
-    //compressor.decode(preEncoding);
-    //printResults(preEncoding);
-    //std::cout << "-------------------- Data input --------------------\n";
-    //SymbolInformation* info = new SymbolInformation();
-    //info->loadData("D:\\Dev\\rANS Compressor\\Debug\\DATA.txt");
-    //info->calculateMetric();
-    //info->printData();
-    //std::cout << "-------------------- rANSCompressor --------------------\n";
-    //SymbolInformation tt(*info);
-    //tt.printData();
-    //rANSCompressor second(tt);
-    //second.printData();
-    //rANSCompressor third(info);
-    //third.printData();
-    //std::cout << "-------------------- Getters test --------------------\n";
-    //delete info;
-    //uint32_t* buffer = info->getFrequencies();
-    //int length = info->getAlphabetSize();
-    //delete info;
-    //for (int i = 0; i < length; i++) {
-    //    std::cout << buffer[i] << std::endl;
-    //}
-    //delete[] buffer;
+    //std::cout << "Decoded buffer: " << decodedFile << std::endl;
+    //std::cout << std::endl;
+    //std::cout << std::endl;
+
+    if (decodedFile == fileNormal) {
+        std::cout << "Encoded and decoded succesfully!\n";
+    }
+    else {
+        std::cout << "Something went wrong!\n";
+    }
+
+    CompressionDetails fileEncodingDetails;
+    fileEncodingDetails = encoder.getEncodingDetails();
+    std::cout << "File encoding time: " << fileEncodingDetails.getOperationTime() << "[s]" << std::endl;
+    std::cout << "File encoding speed: " << fileEncodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
+    std::cout << "File size after encoding: " << fileEncodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << std::endl;
+
+    CompressionDetails fileDecodingDetails;
+    fileDecodingDetails = encoder.getDecodingDetails();
+    std::cout << "File decoding time: " << fileDecodingDetails.getOperationTime() << "[s]" << std::endl;
+    std::cout << "File decoding speed: " << fileDecodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
+    std::cout << "File size after decoding: " << fileDecodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << std::endl;
+
+    double nomFile = fileDecodingDetails.getObjectSize();
+    double deFile = fileEncodingDetails.getObjectSize();
+    double fileCR = nomFile / deFile;
+    std::cout << "File compression ratio: " << fileCR << std::endl;
 
     std::cin.get();
 }
