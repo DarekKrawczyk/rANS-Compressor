@@ -518,7 +518,7 @@ void rANS::SymbolInformation::toFile(const std::string path)
 bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
 {
 	bool result = false;
-	std::ifstream file("C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\symbolInformations.txt");
+	std::ifstream file(path);
 	if (file.is_open()) {
 		std::cout << path << " - file opened successfully!" << std::endl;
 
@@ -564,13 +564,13 @@ bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
 						tempChar = character;
 					}
 					else {
-						_symbols[index] = (uint8_t)tempChar;
+						_symbols[index] = tempChar;
 						index++;
 						temp = "";
 					}
 				}
 				else {
-					_symbols[index] = (uint8_t)tempChar;
+					_symbols[index] = tempChar;
 					index = 0;
 					temp = "";
 					dataBuffer = "";
@@ -707,7 +707,6 @@ bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
 
 		result = true;
 		file.close();
-		this->calculateMetric();
 	}
 	else {
 		std::cout << path << " - failed to open the file!!!" << std::endl;
