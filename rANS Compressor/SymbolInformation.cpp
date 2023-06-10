@@ -453,6 +453,267 @@ void rANS::SymbolInformation::calculateMetric() {
 
 	//std::cout << "Finished calculating!" << std::endl;
 }
+void rANS::SymbolInformation::toFile(const std::string path)
+{
+	std::ofstream file("symbolInformations.txt");
+
+	file << "N {" << _n << "}";
+	//file << "\nScale {" << _scale << "}";
+	//file << "\nMask {" << _mask << "}";
+	//file << "\nD {" << _d << "}";
+	file << "\nRenormalization factor {" << _normalizationFactor << "}";
+	//file << "\nRenorm LOW {" << _renormLow << "}";
+	//file << "\nRenorm HIGH {" << _renormHigh << "}";
+
+	//Save symbols.
+	file << "\nSymbols {";
+	for (int i = 0; i < (1 << N); i++) {
+		file << (uint8_t)_symbols[i] << (i == (1 << N) - 1 ? "}" : ",");
+	}
+
+	//Save frequencies
+	file << "\nFrequenies {";
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		file << _frequencies[i] << (i == ALPHABET_SIZE - 1 ? "}" : ",");
+	}
+
+	//Save cumulatives
+	file << "\nCumulatives {";
+	for (int i = 0; i < ALPHABET_SIZE + 1; i++) {
+		file << _cumulatives[i] << (i == (ALPHABET_SIZE) ? "}" : ",");
+	}
+
+	//Save max encode state
+	file << "\nMax encoder state {";
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		file << _maxEncoderState[i] << (i == ALPHABET_SIZE - 1 ? "}" : ",");
+	}
+
+	//Save bias
+	file << "\nBias {";
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		file << _bias[i] << (i == ALPHABET_SIZE - 1 ? "}" : ",");
+	}
+
+	//Save Reciprocal freqencies
+	file << "\nMax reciprocal frequencies {";
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		file << _reciprocalFreq[i] << (i == ALPHABET_SIZE - 1 ? "}" : ",");
+	}
+
+	//Save frequencies complement  
+	file << "\nFrequencies complement {";
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		file << _frequencyComplement[i] << (i == ALPHABET_SIZE - 1 ? "}" : ",");
+	}
+
+	//Save reciprocal shift
+	file << "\nReciprocal shift{";
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		file << _reciprocalShift[i] << (i == ALPHABET_SIZE - 1 ? "}" : ",");
+	}
+
+	file.close();
+}
+bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
+{
+	bool result = false;
+	std::ifstream file("C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\symbolInformations.txt");
+	if (file.is_open()) {
+		std::cout << path << " - file opened successfully!" << std::endl;
+
+		//Read symbols from file.
+		std::string dataBuffer = "";
+		std::string temp = "";
+		uint8_t tempChar;
+		int index = 0;
+		char character;
+		while (file.get(character)) {
+			if (dataBuffer == "N {") {
+				if (character != '}') {
+					temp += character;
+				}
+				else {
+					_n = (uint32_t)stoi(temp);
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nRenormalization factor {") {
+				if (character != '}') {
+					temp += character;
+				}
+				else {
+					_normalizationFactor = (uint32_t)stoi(temp);
+
+					//Calculate other parameters based on N and renorm factor.
+					_scale = 1 << _n;
+					_mask = (1u << _n) - 1;
+					_d = (2 * _normalizationFactor) - _n;
+					_renormLow = (1u << _normalizationFactor);
+					_renormHigh = (1u << 2 * _normalizationFactor) - 1;
+
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nSymbols {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+						tempChar = character;
+					}
+					else {
+						_symbols[index] = (uint8_t)tempChar;
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_symbols[index] = (uint8_t)tempChar;
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nFrequenies {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_frequencies[index] = (uint32_t)stoi(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_frequencies[index] = (uint32_t)stoi(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nCumulatives {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_cumulatives[index] = (uint32_t)stoi(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_cumulatives[index] = (uint32_t)stoi(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}			
+			else if (dataBuffer == "\nMax encoder state {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_maxEncoderState[index] = (uint32_t)stoi(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_maxEncoderState[index] = (uint32_t)stoi(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}			
+			else if (dataBuffer == "\nBias {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_bias[index] = (uint32_t)stoi(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_bias[index] = (uint32_t)stoi(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}			
+			else if (dataBuffer == "\nMax reciprocal frequencies {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_reciprocalFreq[index] = (uint32_t)stoul(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_reciprocalFreq[index] = (uint32_t)stoul(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}			
+			else if (dataBuffer == "\nFrequencies complement {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_frequencyComplement[index] = (uint32_t)stoi(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_frequencyComplement[index] = (uint32_t)stoi(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}			
+			else if (dataBuffer == "\nReciprocal shift{") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_reciprocalShift[index] = (uint32_t)stoi(temp);
+						index++;
+						temp = "";
+					}
+				}
+				else {
+					_reciprocalShift[index] = (uint32_t)stoi(temp);
+					index = 0;
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else dataBuffer += character;
+		}
+
+		result = true;
+		file.close();
+		this->calculateMetric();
+	}
+	else {
+		std::cout << path << " - failed to open the file!!!" << std::endl;
+	}
+	return result;
+}
 #pragma endregion
 #pragma region Private methods
 /// <summary>

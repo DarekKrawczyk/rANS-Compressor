@@ -26,6 +26,8 @@ namespace rANS {
 
 		bool loadDataFromFile(const std::string& path);
 		void calculateMetric();
+		void toFile(const std::string path = "");
+		bool loadSymbolInfoFromFile(const std::string path);
 		void printData();
 		void calculateSymbolsInformation();
 		void clearData();

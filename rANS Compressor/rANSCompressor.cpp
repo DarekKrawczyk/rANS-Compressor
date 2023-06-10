@@ -32,6 +32,65 @@ rANS::rANSCompressor::~rANSCompressor() {
 }
 
 /// <summary>
+/// Encode file with rANS compressor. Methods creates "output" file with "results.txt" file that is an encoded message.
+/// </summary>
+/// <param name="path">Path of fileto be encoded.</param>
+/// <returns>0 - operation successful, 1 - file not found, 2 - error</returns>
+uint32_t rANS::rANSCompressor::encodeFile(const std::string path)
+{
+	//Open to be encoded and calculate symbol information.
+	SymbolInformation symbolInfo;
+	symbolInfo.loadDataFromFile(path);
+	symbolInfo.toFile();
+
+	//Create folder and file that is result encoded message.
+	_outputFile.open("encoded.txt");
+
+	//Load symbol information and reset all of the buffers.
+	_symbolInformation = symbolInfo;
+	_decoderState = 0;
+	_decodedBuffer = "";
+	_encodedBuffer = "";
+	_encoderState = _symbolInformation.getLowRenormBoundary();		//Starting with low boundary value.
+
+	//Start measuring time.
+	std::chrono::steady_clock::time_point beginTime = std::chrono::high_resolution_clock::now();
+
+	//For each symbol in buffer perform encoding operation.
+	size_t size = _symbolInformation.getBufferSize();
+	for (size_t i = 0; i < size; i++) {
+		this->encodeStep(_symbolInformation.getBuffer(i), false);
+	}
+
+	//Write state of encoder into buffer. _encoderState variable is uint32_t thus 4 bytes.
+	uint8_t lastSymbol1 = (_encoderState & (0xff));
+	_encoderState = (_encoderState >> 8);
+	uint8_t lastSymbol2 = (_encoderState & (0xff));
+	_encoderState = (_encoderState >> 8);
+	uint8_t lastSymbol3 = (_encoderState & (0xff));
+	_encoderState = (_encoderState >> 8);
+	uint8_t lastSymbol4 = (_encoderState & (0xff));
+
+	this->write8bits(lastSymbol4);
+	this->write8bits(lastSymbol3);
+	this->write8bits(lastSymbol2);
+	this->write8bits(lastSymbol1);
+
+	//Finish measuring time.
+	std::chrono::steady_clock::time_point endTime = std::chrono::high_resolution_clock::now();
+
+	//Fill information about encoding process.
+	_encodingDetails.setOperationTime(endTime - beginTime);
+	_encodingDetails.setObjectSize(_encodedBuffer.size());
+	_encodingDetails.calculate();
+
+	//Close file.
+	_outputFile.close();
+
+	return 0;
+}
+
+/// <summary>
 /// Encode given data.
 /// </summary>
 /// <param name="info">Object with data to encode with necessary information about symbols.</param>
@@ -82,7 +141,7 @@ std::string rANS::rANSCompressor::encode(const SymbolInformation& info) {
 /// Encode a single symbol.
 /// </summary>
 /// <param name="symbol">Symbol to encode.</param>
-void rANS::rANSCompressor::encodeStep(uint32_t symbol) {
+void rANS::rANSCompressor::encodeStep(uint32_t symbol, bool toBuffer) {
 #if Implementation == 0
     uint32_t tempEncoderState = _encoderState;
     uint32_t maxEncoderState = _symbolInformation.getMaxEncoderState(symbol);
@@ -92,7 +151,12 @@ void rANS::rANSCompressor::encodeStep(uint32_t symbol) {
         do {
 			//Write last 8 bites into encoded buffer.
             uint8_t last8Bits = (uint8_t)(tempEncoderState & 0xff);
-			_encodedBuffer += last8Bits;
+			if (toBuffer == true) {
+				_encodedBuffer += last8Bits;
+			}
+			else {
+				this->write8bits(last8Bits);
+			}
 			tempEncoderState >>= 8;
         } while (tempEncoderState >= maxEncoderState);
     }
@@ -229,4 +293,9 @@ uint8_t rANS::rANSCompressor::read8bits() {
 	uint8_t last8bits = _encodedBuffer[_encodedBuffer.length() - 1];
 	_encodedBuffer.pop_back();
 	return last8bits;
+}
+
+void rANS::rANSCompressor::write8bits(uint8_t buffer)
+{
+	_outputFile << buffer;
 }

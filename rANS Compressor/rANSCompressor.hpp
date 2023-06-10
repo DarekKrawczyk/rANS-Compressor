@@ -5,6 +5,7 @@
 #include <math.h>
 #include <vector>
 #include <chrono>
+#include <fstream>
 
 // Implmenentation 1 - own, 0 - rygorous
 #define Implementation 0
@@ -21,6 +22,7 @@ namespace rANS {
 		rANSCompressor(const SymbolInformation* info);
 		~rANSCompressor();
 
+		uint32_t encodeFile(const std::string path);
 		std::string encode(const SymbolInformation& info);
 		std::string decode(const SymbolInformation& info, const std::string& encodedData);
 
@@ -36,10 +38,12 @@ namespace rANS {
 		std::string _decodedBuffer;
 		CompressionDetails _encodingDetails;
 		CompressionDetails _decodingDetails;
+		std::ofstream _outputFile;
 
 	private:
-		void encodeStep(uint32_t symbol);
+		void encodeStep(uint32_t symbol, bool toBuffer = true);
 		void decodeStep();
 		uint8_t read8bits();
+		void write8bits(uint8_t buffer);
 	};
 }

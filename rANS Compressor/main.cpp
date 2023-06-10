@@ -22,7 +22,8 @@ int main()
     //std::string message = "test";
     //std::string message = "testtesttest";
 
-    std::string message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    //std::string message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    std::string message = "ala ma kota a kot ma ale!";
     std::string encodedMessage = "";
     std::string decodedMessage = "";
 
@@ -34,17 +35,17 @@ int main()
 
     std::cout << "------------------------- Message -------------------------\n";
 
-    //std::cout << "Input buffer: " << message << std::endl;
-    //std::cout<<std::endl;
-    //std::cout<<std::endl;
+    std::cout << "Input buffer: " << message << std::endl;
+    std::cout<<std::endl;
+    std::cout<<std::endl;
 
-    //std::cout << "Encoded buffer: " << encodedMessage << std::endl;
-    //std::cout << std::endl;
-    //std::cout << std::endl;
+    std::cout << "Encoded buffer: " << encodedMessage << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
 
-    //std::cout << "Decoded buffer: " << decodedMessage << std::endl;
-    //std::cout << std::endl;
-    //std::cout << std::endl;
+    std::cout << "Decoded buffer: " << decodedMessage << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
 
     if (decodedMessage == message) {
         std::cout << "Encoded and decoded succesfully!\n";
@@ -76,7 +77,7 @@ int main()
     std::cout << std::endl;
     std::cout << "------------------------- From file -------------------------\n";
 
-    std::string path = "D:\\Dev\\rANS Compressor\\rANS Compressor\\result.txt";
+    std::string path = "C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\result.txt";
     std::string fileNormal = "";
     std::string encodedFile = "";
     std::string decodedFile = "";
@@ -124,6 +125,13 @@ int main()
     double deFile = fileEncodingDetails.getObjectSize();
     double fileCR = nomFile / deFile;
     std::cout << "File compression ratio: " << fileCR << std::endl;
+
+    std::cout << "------------------------- Encode from file to file -------------------------\n";
+    rANSCompressor f2f;
+    f2f.encodeFile("C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\data.txt");
+
+    SymbolInformation infos;
+    infos.loadSymbolInfoFromFile("C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\symbolInformations.txt");
 
     std::cin.get();
 }
