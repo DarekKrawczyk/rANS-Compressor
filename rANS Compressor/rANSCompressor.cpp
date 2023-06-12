@@ -208,7 +208,7 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 
 	//Opening encoded file and reading its contence.
 	std::string encodedData = "";
-	std::ifstream file(pathOfFileToDecode);
+	std::ifstream file(pathOfFileToDecode, std::ios_base::binary);
 	if (file.is_open()) {
 		//std::cout << pathOfFileToDecode << " - file opened successfully!" << std::endl;
 
@@ -220,11 +220,6 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 		}
 
 		file.close();
-
-		std::ifstream t("encoded.txt");
-		std::stringstream bufik;
-		bufik << t.rdbuf();
-		std::string sd = bufik.str();
 	}
 	else {
 		std::cout << pathOfFileToDecode << " - failed to open the file!!!" << std::endl;

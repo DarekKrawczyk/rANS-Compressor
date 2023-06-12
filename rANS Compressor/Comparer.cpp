@@ -7,18 +7,14 @@ bool Comparer::compareFiles(std::string one, std::string another)
 
 	std::ifstream file(one);
 	if (file.is_open()) {
-		char character;
-		while (file.get(character)) {
-			firstText += character;
-		}
+		firstText = std::string((std::istreambuf_iterator<char>(file)),
+			std::istreambuf_iterator<char>());
 
 		file.close();
 		std::ifstream secondFile(another);
 		if (secondFile.is_open()) {
-			char character;
-			while (secondFile.get(character)) {
-				secondText += character;
-			}
+			secondText = std::string((std::istreambuf_iterator<char>(secondFile)),
+				std::istreambuf_iterator<char>());
 
 			secondFile.close();
 

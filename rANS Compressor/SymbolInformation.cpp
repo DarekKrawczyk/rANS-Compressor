@@ -274,9 +274,31 @@ bool rANS::SymbolInformation::isEqual(const SymbolInformation& other)
 /// <param name="path">Path of the file.</param>
 /// <returns>True if operation was successful, otherwise false.</returns>
 std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::string path) {
+	std::shared_ptr<std::string> buffer = std::make_shared<std::string>();
+	std::ifstream file(path, std::ios_base::binary);
+	if (file.is_open()) {
+		//Read symbols from file.
+		*buffer = "";
+		char character;
+		while (file.get(character)) {
+			*buffer += character;
+		}
+
+		bufferSize = buffer->length();
+		file.close();
+		this->calculateMetric(*buffer);
+	}
+	else {
+		std::cout << path << " - failed to open the file!!!" << std::endl;
+	}
+	return buffer;
+}
+
+/*
+std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::string path) {
 	bool result = false;
 	std::shared_ptr<std::string> buffer = std::make_shared<std::string>();
-	std::ifstream file(path);
+	std::ifstream file(path, std::ios_base::binary);
 	if (file.is_open()) {
 		//std::cout << path << " - file opened successfully!" << std::endl;
 
@@ -297,6 +319,9 @@ std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::stri
 	}
 	return buffer;
 }
+
+
+*/
 
 /// <summary>
 /// Print all information about the symbols.

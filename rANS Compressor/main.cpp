@@ -10,8 +10,8 @@
 #include "Comparer.hpp"
 
 #define rANS_test_FILE_TO_CONSOLE 0
-#define rANS_test_FILE 1
-#define rANS_test_MESSAGE 0
+#define rANS_test_FILE 0
+#define rANS_test_MESSAGE 1
 
 using namespace rANS;
 
@@ -78,8 +78,8 @@ int main()
     std::cout << "-------------------- Encoding and decoding message --------------------\n\n";
 
     std::shared_ptr<std::string> messageBuffer = std::make_shared<std::string>();
-    //*messageBuffer = "ala ma kota a kot ma ale!";
-    *messageBuffer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    *messageBuffer = "Ala ma kota a kot ma Ale!";
+    //*messageBuffer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
     //std::string message = "ala ma kota a kot ma ale!";
     std::string encodedMessage = "";
     std::string decodedMessage = "";

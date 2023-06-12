@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <streambuf>
 #include <math.h>
 
 #define mod %
