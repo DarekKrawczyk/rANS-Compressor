@@ -24,17 +24,18 @@ namespace rANS {
 		SymbolInformation(const SymbolInformation* other);
 		~SymbolInformation();
 
-		bool loadDataFromFile(const std::string& path);
-		void calculateMetric();
-		void toFile(const std::string path = "");
-		bool loadSymbolInfoFromFile(const std::string path);
+		std::shared_ptr<std::string> loadDataFromFile(std::string path);
+		void calculateMetric(const std::string& dataBuffer);
+		void toFile(std::string path = "");
+		bool loadSymbolInfoFromFile(std::string path);
 		void printData();
 		void calculateSymbolsInformation();
 		void clearData();
+		bool isEqual(const SymbolInformation& other);
 
 		// Accessors
-		std::string getBuffer() const;
-		char getBuffer(int index) const;
+		//std::string getBuffer() const;
+		//char getBuffer(int index) const;
 		size_t getBufferSize() const;
 
 		uint32_t getD() const;
@@ -54,7 +55,8 @@ namespace rANS {
 		size_t getAlphabetSize() const;
 
 	private:
-		std::string _dataBuffer;
+		//std::string _dataBuffer;
+		size_t bufferSize = 0;
 		std::string _alphabet;
 
 		uint32_t _n = N;
@@ -64,7 +66,7 @@ namespace rANS {
 
 		uint32_t _normalizationFactor = NORMALIZATION_FACTOR;
 		uint32_t _renormLow = (1u << NORMALIZATION_FACTOR);
-		uint32_t _renormHigh = (1u << 2 * NORMALIZATION_FACTOR) - 1;
+		uint64_t _renormHigh = (1u << 2 * NORMALIZATION_FACTOR) - 1;
 
 		uint8_t _symbols[1 << N]{ 0 };
 		uint32_t _maxEncoderState[ALPHABET_SIZE]{ 0 };		// (Exclusive) upper bound of pre-normalization interval

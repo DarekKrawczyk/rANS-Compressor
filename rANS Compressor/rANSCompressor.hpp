@@ -1,6 +1,8 @@
 #pragma once
 #include "SymbolInformation.hpp"
 #include "CompressionDetails.hpp"
+#include <filesystem>
+#include <sstream>
 #include <list>
 #include <math.h>
 #include <vector>
@@ -22,8 +24,10 @@ namespace rANS {
 		rANSCompressor(const SymbolInformation* info);
 		~rANSCompressor();
 
-		uint32_t encodeFile(const std::string path);
-		std::string encode(const SymbolInformation& info);
+		uint32_t encodeFile(std::string pathOfFileToEncode);
+		uint32_t decodeFile(std::string pathOfFileToDecode, std::string pathOfFileWithSymbolInfo);
+
+		std::string encode(const std::string& datBuffer, const SymbolInformation& info);
 		std::string decode(const SymbolInformation& info, const std::string& encodedData);
 
 		void printData();

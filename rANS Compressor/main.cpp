@@ -4,8 +4,14 @@
 #include <vector>
 #include <string>
 #include <math.h>
+#include <filesystem>
 #include "SymbolInformation.hpp"
 #include "rANSCompressor.hpp"
+#include "Comparer.hpp"
+
+#define rANS_test_FILE_TO_CONSOLE 0
+#define rANS_test_FILE 1
+#define rANS_test_MESSAGE 0
 
 using namespace rANS;
 
@@ -17,37 +23,74 @@ using namespace rANS;
 
 int main()
 {
-    //std::string message = "102110211021";
-    //std::string message = "Ala ma kota a kot ma ale!";
-    //std::string message = "test";
-    //std::string message = "testtesttest";
+    std::string PATH = "D:\\Dev\\rANS Compressor\\rANS Compressor\\";
 
-    //std::string message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-    std::string message = "ala ma kota a kot ma ale!";
+#if rANS_test_FILE == 1
+
+    std::shared_ptr<std::string> buffer;
+    // ---------- File encoding and decoding. ----------
+    std::string inputFilename = "data.txt";
+
+    std::cout << "-------------------- Encoding and decoding file --------------------\n\n";
+
+    SymbolInformation testingData;
+    buffer = testingData.loadDataFromFile(PATH + inputFilename);
+    testingData.toFile();
+
+    SymbolInformation info;
+    info.loadSymbolInfoFromFile(PATH + "symbolInformations.txt");
+
+    bool same = testingData.isEqual(info);
+
+    rANSCompressor compressor;
+
+    compressor.encodeFile(PATH + inputFilename);
+    compressor.decodeFile(PATH + "encoded.txt", PATH + "symbolInformations.txt");
+
+    bool result = Comparer::compareFiles(PATH + inputFilename, PATH + "decoded.txt");
+    std::cout << (result == true ? "File encoded and decoded successfully!\n" : "Something went wrong!\n") << std::endl;
+
+    CompressionDetails fileEncodingDetails;
+    fileEncodingDetails = compressor.getEncodingDetails();
+    std::cout << "File: "<< inputFilename <<" encoding time: " << fileEncodingDetails.getOperationTime() << "[s]" << std::endl;
+    std::cout << "File encoding speed: " << fileEncodingDetails.getOperationSpeed() << "[B/s]" << std::endl;
+    std::cout << "File size after encoding: " << fileEncodingDetails.getObjectSize() << "[B]" << std::endl;
+    std::cout << std::endl;
+
+    CompressionDetails fileDecodingDetails;
+    fileDecodingDetails = compressor.getDecodingDetails();
+    std::cout << "File: " << "encoded.txt" << " decoding time: " << fileDecodingDetails.getOperationTime() << "[s]" << std::endl;
+    std::cout << "File decoding speed: " << fileDecodingDetails.getOperationSpeed() << "[B/s]" << std::endl;
+    std::cout << "File size after decoding: " << fileDecodingDetails.getObjectSize() << "[B]" << std::endl;
+    std::cout << std::endl;
+
+    double filenom = fileEncodingDetails.getObjectSize();
+    double filede = fileDecodingDetails.getObjectSize();
+    double fileCompressionRation = filenom / filede;
+    std::cout << "File compression ratio: " << fileCompressionRation << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+#endif
+    // --------------------------------------------------------------------------------------------
+#if rANS_test_MESSAGE == 1
+
+    std::cout << "-------------------- Encoding and decoding message --------------------\n\n";
+
+    std::shared_ptr<std::string> messageBuffer = std::make_shared<std::string>();
+    //*messageBuffer = "ala ma kota a kot ma ale!";
+    *messageBuffer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    //std::string message = "ala ma kota a kot ma ale!";
     std::string encodedMessage = "";
     std::string decodedMessage = "";
 
-    SymbolInformation testingData(message);
-    rANSCompressor compressor;
+    SymbolInformation info(*messageBuffer);
+    rANSCompressor messageCompressor;
 
-    encodedMessage = compressor.encode(testingData);
-    decodedMessage = compressor.decode(testingData, encodedMessage);
+    encodedMessage = messageCompressor.encode(*messageBuffer, info);
+    decodedMessage = messageCompressor.decode(info, encodedMessage);
 
-    std::cout << "------------------------- Message -------------------------\n";
-
-    std::cout << "Input buffer: " << message << std::endl;
-    std::cout<<std::endl;
-    std::cout<<std::endl;
-
-    std::cout << "Encoded buffer: " << encodedMessage << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "Decoded buffer: " << decodedMessage << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    if (decodedMessage == message) {
+    if (decodedMessage == *messageBuffer) {
         std::cout << "Encoded and decoded succesfully!\n";
     }
     else {
@@ -55,17 +98,17 @@ int main()
     }
     
     CompressionDetails messageEncodingDetails;
-    messageEncodingDetails = compressor.getEncodingDetails();
+    messageEncodingDetails = messageCompressor.getEncodingDetails();
     std::cout << "Message encoding time: " << messageEncodingDetails.getOperationTime() << "[s]" << std::endl;
-    std::cout << "Message encoding speed: " << messageEncodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
-    std::cout << "Message size after encoding: " << messageEncodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << "Message encoding speed: " << messageEncodingDetails.getOperationSpeed() << "[B/s]" << std::endl;
+    std::cout << "Message size after encoding: " << messageEncodingDetails.getObjectSize() << "[B]" << std::endl;
     std::cout << std::endl;
 
     CompressionDetails messageDecodingDetails;
-    messageDecodingDetails = compressor.getDecodingDetails();
+    messageDecodingDetails = messageCompressor.getDecodingDetails();
     std::cout << "Message decoding time: " << messageDecodingDetails.getOperationTime() << "[s]" << std::endl;
-    std::cout << "Message decoding speed: " << messageDecodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
-    std::cout << "Message size after decoding: " << messageDecodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << "Message decoding speed: " << messageDecodingDetails.getOperationSpeed() << "[B/s]" << std::endl;
+    std::cout << "Message size after decoding: " << messageDecodingDetails.getObjectSize() << "[B]" << std::endl;
     std::cout << std::endl;
 
     double nom = messageDecodingDetails.getObjectSize();
@@ -75,32 +118,25 @@ int main()
 
     std::cout << std::endl;
     std::cout << std::endl;
-    std::cout << "------------------------- From file -------------------------\n";
+#endif
+    // --------------------------------------------------------------------------------------------
+#if rANS_test_FILE_TO_CONSOLE == 1
 
-    std::string path = "C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\result.txt";
-    std::string fileNormal = "";
+    std::cout << "------------------------- From file -------------------------\n";
+   
+    std::shared_ptr<std::string> fromFileBuff = std::make_shared<std::string>();
+    std::string path = PATH + "data.txt";
     std::string encodedFile = "";
     std::string decodedFile = "";
+
     SymbolInformation infoFromFile;
-    infoFromFile.loadDataFromFile(path);
-    fileNormal = infoFromFile.getBuffer();
+    fromFileBuff = infoFromFile.loadDataFromFile(path);
+
     rANSCompressor encoder;
-    encodedFile = encoder.encode(infoFromFile);
+    encodedFile = encoder.encode(*fromFileBuff, infoFromFile);
     decodedFile = encoder.decode(infoFromFile, encodedFile);
 
-    //std::cout << "Input buffer: " << fileNormal << std::endl;
-    //std::cout << std::endl;
-    //std::cout << std::endl;
-
-    //std::cout << "Encoded buffer: " << encodedMessage << std::endl;
-    //std::cout << std::endl;
-    //std::cout << std::endl;
-
-    //std::cout << "Decoded buffer: " << decodedFile << std::endl;
-    //std::cout << std::endl;
-    //std::cout << std::endl;
-
-    if (decodedFile == fileNormal) {
+    if (decodedFile == *fromFileBuff) {
         std::cout << "Encoded and decoded succesfully!\n";
     }
     else {
@@ -110,15 +146,15 @@ int main()
     CompressionDetails fileEncodingDetails;
     fileEncodingDetails = encoder.getEncodingDetails();
     std::cout << "File encoding time: " << fileEncodingDetails.getOperationTime() << "[s]" << std::endl;
-    std::cout << "File encoding speed: " << fileEncodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
-    std::cout << "File size after encoding: " << fileEncodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << "File encoding speed: " << fileEncodingDetails.getOperationSpeed() << "[B/s]" << std::endl;
+    std::cout << "File size after encoding: " << fileEncodingDetails.getObjectSize() << "[B]" << std::endl;
     std::cout << std::endl;
 
     CompressionDetails fileDecodingDetails;
     fileDecodingDetails = encoder.getDecodingDetails();
     std::cout << "File decoding time: " << fileDecodingDetails.getOperationTime() << "[s]" << std::endl;
-    std::cout << "File decoding speed: " << fileDecodingDetails.getOperationSpeed() << "[byte/s]" << std::endl;
-    std::cout << "File size after decoding: " << fileDecodingDetails.getObjectSize() << "[byte]" << std::endl;
+    std::cout << "File decoding speed: " << fileDecodingDetails.getOperationSpeed() << "[B/s]" << std::endl;
+    std::cout << "File size after decoding: " << fileDecodingDetails.getObjectSize() << "[B]" << std::endl;
     std::cout << std::endl;
 
     double nomFile = fileDecodingDetails.getObjectSize();
@@ -126,12 +162,7 @@ int main()
     double fileCR = nomFile / deFile;
     std::cout << "File compression ratio: " << fileCR << std::endl;
 
-    std::cout << "------------------------- Encode from file to file -------------------------\n";
-    rANSCompressor f2f;
-    f2f.encodeFile("C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\data.txt");
-
-    SymbolInformation infos;
-    infos.loadSymbolInfoFromFile("C:\\Users\\Administrator\\source\\repos\\rANS-Compressor\\rANS Compressor\\symbolInformations.txt");
+#endif
 
     std::cin.get();
 }

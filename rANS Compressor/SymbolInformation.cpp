@@ -5,7 +5,8 @@
 /// Default constructor.
 /// </summary>
 rANS::SymbolInformation::SymbolInformation() {
-	_dataBuffer = "";
+	//_dataBuffer = "";
+	bufferSize = 0;
 	_alphabet = "";
 }
 
@@ -14,9 +15,10 @@ rANS::SymbolInformation::SymbolInformation() {
 /// </summary>
 /// <param name="dataBuffer">Data</param>
 rANS::SymbolInformation::SymbolInformation(const std::string& dataBuffer) {
-	_dataBuffer = dataBuffer;
+	//_dataBuffer = dataBuffer;
 	_alphabet = "";
-	this->calculateMetric();
+	bufferSize = dataBuffer.length();
+	this->calculateMetric(dataBuffer);
 }
 
 /// <summary>
@@ -25,7 +27,8 @@ rANS::SymbolInformation::SymbolInformation(const std::string& dataBuffer) {
 /// <param name="other">Object from which to copy data.</param>
 rANS::SymbolInformation::SymbolInformation(const SymbolInformation* other) {
 	//Coping buffer and alphabet.
-	this->_dataBuffer = other->_dataBuffer;
+	//this->_dataBuffer = other->_dataBuffer;
+	this->bufferSize = other->bufferSize;
 	this->_alphabet = other->_alphabet;
 
 	//Coping frequencies.
@@ -57,7 +60,8 @@ rANS::SymbolInformation::SymbolInformation(const SymbolInformation* other) {
 /// <param name="other">Object from which to copy data.</param>
 rANS::SymbolInformation::SymbolInformation(const SymbolInformation& other) {
 	//Coping buffer and alphabet.
-	this->_dataBuffer = other._dataBuffer;
+	//this->_dataBuffer = other._dataBuffer;
+	this->bufferSize = other.bufferSize;
 	this->_alphabet = other._alphabet;
 
 	//Coping frequencies.
@@ -91,19 +95,19 @@ rANS::SymbolInformation::~SymbolInformation() {
 }
 #pragma endregion
 #pragma region Accessors
-std::string rANS::SymbolInformation::getBuffer() const
-{
-	return _dataBuffer;
-}
-
-char rANS::SymbolInformation::getBuffer(int index) const
-{
-	return _dataBuffer[index];
-}
-
+//std::string rANS::SymbolInformation::getBuffer() const
+//{
+//	return _dataBuffer;
+//}
+//
+//char rANS::SymbolInformation::getBuffer(int index) const
+//{
+//	return _dataBuffer[index];
+//}
+//
 size_t rANS::SymbolInformation::getBufferSize() const
 {
-	return _dataBuffer.length();
+	return bufferSize;
 }
 
 uint8_t rANS::SymbolInformation::getAlphabet(uint32_t index) const
@@ -187,7 +191,7 @@ uint16_t rANS::SymbolInformation::getReciprocalShift(uint32_t index) const
 /// </summary>
 void rANS::SymbolInformation::clearData() {
 	//Clear data buffer.
-	_dataBuffer.clear();
+	//_dataBuffer.clear();
 	_alphabet.clear();
 
 	//Clear all of the symbol information.
@@ -209,63 +213,116 @@ void rANS::SymbolInformation::clearData() {
 	}
 }
 
+bool rANS::SymbolInformation::isEqual(const SymbolInformation& other)
+{
+	if (this->bufferSize != other.bufferSize) {
+		return false;
+	}
+	if (this->_alphabet != other._alphabet) {
+		return false;
+	}
+	if (this->_n != other._n) {
+		return false;
+	}
+	if (this->_scale != other._scale) {
+		return false;
+	}
+	if (this->_mask != other._mask) {
+		return false;
+	}
+	if (this->_d != other._d) {
+		return false;
+	}
+	if (this->_normalizationFactor != other._normalizationFactor) {
+		return false;
+	}
+	if (this->_renormLow != other._renormLow) {
+		return false;
+	}
+	if (this->_renormHigh != other._renormHigh) {
+		return false;
+	}
+	for (int i = 0; i < (1 << N); i++) {
+		uint8_t first = this->_symbols[i];
+		uint8_t sec = other._symbols[i];
+		if (this->_symbols[i] != other._symbols[i]) {
+			return false;
+		}
+	}
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		if (this->_maxEncoderState[i] != other._maxEncoderState[i] or
+			this->_bias[i] != other._bias[i] or
+			this->_reciprocalFreq[i] != other._reciprocalFreq[i] or
+			this->_frequencyComplement[i] != other._frequencyComplement[i] or
+			this->_reciprocalShift[i] != other._reciprocalShift[i] or
+			this->_frequencies[i] != other._frequencies[i] or
+			this->_cumulatives[i] != other._cumulatives[i]) {
+			return false;
+		}
+	}
+	for (int i = 0; i < (ALPHABET_SIZE + 1); i++) {
+		if (this->_cumulatives[i] != other._cumulatives[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /// <summary>
 /// Load data from file and calculate it's metric.
 /// </summary>
 /// <param name="path">Path of the file.</param>
 /// <returns>True if operation was successful, otherwise false.</returns>
-bool rANS::SymbolInformation::loadDataFromFile(const std::string& path) {
+std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::string path) {
 	bool result = false;
+	std::shared_ptr<std::string> buffer = std::make_shared<std::string>();
 	std::ifstream file(path);
 	if (file.is_open()) {
-		std::cout << path << " - file opened successfully!" << std::endl;
+		//std::cout << path << " - file opened successfully!" << std::endl;
 
 		//Read symbols from file.
-		_dataBuffer = "";
+		*buffer = "";
 		char character;
 		while (file.get(character)) {
-			_dataBuffer += character;
+			*buffer += character;
 		}
 
+		bufferSize = buffer->length();
 		result = true;
 		file.close();
-		this->calculateMetric();
+		this->calculateMetric(*buffer);
 	}
 	else {
 		std::cout << path << " - failed to open the file!!!" << std::endl;
 	}
-	return result;
+	return buffer;
 }
 
 /// <summary>
 /// Print all information about the symbols.
 /// </summary>
 void rANS::SymbolInformation::printData() {
-	if (_dataBuffer.length() <= 0) {
-		std::cout << "Data buffer is empty!\n";
-	}
-	else {
 		std::cout << "\n------------------- Data begin --------------------\n";
 		//M
 		//std::string M = "M = {" + std::to_string(_M) + "}\n";
 		//std::cout << M;
 
 		//Data size
-		std::string bufforSize = "Buffor size = {" + std::to_string(_dataBuffer.length()) + "}\n";
-		std::cout << bufforSize;
+		//std::string bufforSize = "Buffor size = {" + std::to_string(_dataBuffer.length()) + "}\n";
+		//std::cout << bufforSize;
 
-		//Data buffer
-		std::string result = "-------------------- Buffor --------------------\n";
-		for (int i = 0; i < _dataBuffer.length(); i++) {
-			char sign = _dataBuffer[i];
-			result += _dataBuffer[i];
-			result += (i + 1 == _dataBuffer.length() ? "" : ",");
-			if (i > 0 and i % 30 == 0) {
-				result += "\n";
-			}
-		}
-		result += "\n--------------------------------------------------\n\n\n";
-		std::cout << result;
+		////Data buffer
+		//std::string result = "-------------------- Buffor --------------------\n";
+		//for (int i = 0; i < _dataBuffer.length(); i++) {
+		//	char sign = _dataBuffer[i];
+		//	result += _dataBuffer[i];
+		//	result += (i + 1 == _dataBuffer.length() ? "" : ",");
+		//	if (i > 0 and i % 30 == 0) {
+		//		result += "\n";
+		//	}
+		//}
+		//result += "\n--------------------------------------------------\n\n\n";
+		//std::cout << result;
 
 		//Alphabet
 		std::string alphabet = "-------------------- Alphabet --------------------\n";
@@ -307,21 +364,20 @@ void rANS::SymbolInformation::printData() {
 		std::cout << cumul;
 
 		std::cout << "\n------------------- Data end----------------------\n\n\n";
-	}
 }
 
 /// <summary>
 /// Calculate metric for symbols.
 /// </summary>
-void rANS::SymbolInformation::calculateMetric() {
+void rANS::SymbolInformation::calculateMetric(const std::string& dataBuffer) {
 	//Fill alphabet with default values.
 	for (int i = 0; i < ALPHABET_SIZE; i++) {
 		_alphabet += (char)i;
 	}
 
 	//Calculate frequencies.
-	for (int i = 0; i < _dataBuffer.length(); i++) {
-		_frequencies[_dataBuffer[i]]++;
+	for (int i = 0; i < dataBuffer.length(); i++) {
+		_frequencies[dataBuffer[i]]++;
 	}
 
 	//Calculate cumulative frequencies.
@@ -453,22 +509,31 @@ void rANS::SymbolInformation::calculateMetric() {
 
 	//std::cout << "Finished calculating!" << std::endl;
 }
-void rANS::SymbolInformation::toFile(const std::string path)
+void rANS::SymbolInformation::toFile(std::string path)
 {
 	std::ofstream file("symbolInformations.txt");
 
 	file << "N {" << _n << "}";
+	file << "\nBuffer size {" << bufferSize << "}";
 	//file << "\nScale {" << _scale << "}";
 	//file << "\nMask {" << _mask << "}";
 	//file << "\nD {" << _d << "}";
 	file << "\nRenormalization factor {" << _normalizationFactor << "}";
+	file << "\nRenorm high {" << _renormHigh << "}";
 	//file << "\nRenorm LOW {" << _renormLow << "}";
 	//file << "\nRenorm HIGH {" << _renormHigh << "}";
+
+	//Save alphabet,
+	file << "\nAlphabet {";
+	size_t alphabetSize = _alphabet.length();
+	for (uint32_t i = 0; i < alphabetSize; i++) {
+		file << i << (i == (alphabetSize) - 1 ? "}" : ","); //TODO: change this to proper alphabet save.
+	}
 
 	//Save symbols.
 	file << "\nSymbols {";
 	for (int i = 0; i < (1 << N); i++) {
-		file << (uint8_t)_symbols[i] << (i == (1 << N) - 1 ? "}" : ",");
+		file << (int)_symbols[i] << (i == (1 << N) - 1 ? "}" : ",");
 	}
 
 	//Save frequencies
@@ -515,16 +580,17 @@ void rANS::SymbolInformation::toFile(const std::string path)
 
 	file.close();
 }
-bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
+bool rANS::SymbolInformation::loadSymbolInfoFromFile(std::string path)
 {
 	bool result = false;
 	std::ifstream file(path);
 	if (file.is_open()) {
-		std::cout << path << " - file opened successfully!" << std::endl;
+		//std::cout << path << " - file opened successfully!" << std::endl;
 
 		//Read symbols from file.
 		std::string dataBuffer = "";
 		std::string temp = "";
+		_alphabet.clear();
 		uint8_t tempChar;
 		int index = 0;
 		char character;
@@ -535,6 +601,32 @@ bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
 				}
 				else {
 					_n = (uint32_t)stoi(temp);
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nAlphabet {") {
+				if (character != '}') {
+					if (character != ',') {
+						temp += character;
+					}
+					else {
+						_alphabet += (uint8_t)stoi(temp);
+						temp = "";
+					}
+				}
+				else {
+					_alphabet += (uint8_t)stoi(temp);
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nBuffer size {") {
+				if (character != '}') {
+					temp += character;
+				}
+				else {
+					bufferSize = (uint32_t)stoi(temp);
 					temp = "";
 					dataBuffer = "";
 				}
@@ -551,7 +643,17 @@ bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
 					_mask = (1u << _n) - 1;
 					_d = (2 * _normalizationFactor) - _n;
 					_renormLow = (1u << _normalizationFactor);
-					_renormHigh = (1u << 2 * _normalizationFactor) - 1;
+
+					temp = "";
+					dataBuffer = "";
+				}
+			}
+			else if (dataBuffer == "\nRenorm high {") {
+				if (character != '}') {
+					temp += character;
+				}
+				else {
+					_renormHigh = (uint64_t)stoul(temp);
 
 					temp = "";
 					dataBuffer = "";
@@ -561,16 +663,16 @@ bool rANS::SymbolInformation::loadSymbolInfoFromFile(const std::string path)
 				if (character != '}') {
 					if (character != ',') {
 						temp += character;
-						tempChar = character;
+						//tempChar = character;
 					}
 					else {
-						_symbols[index] = tempChar;
+						_symbols[index] = (uint64_t)stoi(temp);
 						index++;
 						temp = "";
 					}
 				}
 				else {
-					_symbols[index] = tempChar;
+					_symbols[index] = (uint64_t)stoi(temp);
 					index = 0;
 					temp = "";
 					dataBuffer = "";
