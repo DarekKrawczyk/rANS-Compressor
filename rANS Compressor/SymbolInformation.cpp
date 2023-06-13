@@ -115,14 +115,14 @@ uint8_t rANS::SymbolInformation::getAlphabet(uint32_t index) const
 	return _alphabet[index];
 }
 
-uint32_t rANS::SymbolInformation::getFrequency(uint32_t index) const
+uint32_t rANS::SymbolInformation::getFrequency(uint8_t symbol) const
 {
-	return _frequencies[index];
+	return _frequencies[symbol];
 }
 
-uint32_t rANS::SymbolInformation::getCumulative(uint32_t index) const
+uint32_t rANS::SymbolInformation::getCumulative(uint8_t symbol) const
 {
-	return _cumulatives[index];
+	return _cumulatives[symbol];
 }
 
 uint32_t rANS::SymbolInformation::getD() const
@@ -180,9 +180,9 @@ uint32_t rANS::SymbolInformation::getFreqComplement(uint8_t symbol) const
 	return _frequencyComplement[symbol];
 }
 
-uint32_t rANS::SymbolInformation::getReciprocalShift(uint32_t index) const
+uint32_t rANS::SymbolInformation::getReciprocalShift(uint8_t symbol) const
 {
-	return _reciprocalShift[index];
+	return _reciprocalShift[symbol];
 }
 #pragma endregion
 #pragma region Public methods

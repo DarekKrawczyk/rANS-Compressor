@@ -49,9 +49,9 @@ namespace rANS {
 		uint32_t getBias(uint8_t symbol) const;
 		uint32_t getReciprocalFreq(uint8_t symbol) const;
 		uint32_t getFreqComplement(uint8_t symbol) const;
-		uint32_t getReciprocalShift(uint32_t index) const;
-		uint32_t getFrequency(uint32_t index) const;
-		uint32_t getCumulative(uint32_t index) const;
+		uint32_t getReciprocalShift(uint8_t symbol) const;
+		uint32_t getFrequency(uint8_t symbol) const;
+		uint32_t getCumulative(uint8_t symbol) const;
 		uint8_t getAlphabet(uint32_t index) const;
 		size_t getAlphabetSize() const;
 
