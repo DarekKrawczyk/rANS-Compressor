@@ -5,13 +5,13 @@ bool Comparer::compareFiles(std::string one, std::string another)
 	std::string firstText = "";
 	std::string secondText = "";
 
-	std::ifstream file(one);
+	std::ifstream file(one, std::ios_base::binary);
 	if (file.is_open()) {
 		firstText = std::string((std::istreambuf_iterator<char>(file)),
 			std::istreambuf_iterator<char>());
 
 		file.close();
-		std::ifstream secondFile(another);
+		std::ifstream secondFile(another, std::ios_base::binary);
 		if (secondFile.is_open()) {
 			secondText = std::string((std::istreambuf_iterator<char>(secondFile)),
 				std::istreambuf_iterator<char>());

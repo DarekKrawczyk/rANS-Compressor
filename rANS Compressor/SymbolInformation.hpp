@@ -44,12 +44,12 @@ namespace rANS {
 		uint32_t getScale() const;
 		uint32_t getMask() const;
 		uint32_t getLowRenormBoundary() const;
-		uint32_t getMaxEncoderState(uint32_t index) const;
+		uint32_t getMaxEncoderState(uint8_t symbol) const;
 		uint8_t getSymbol(uint32_t index) const;
-		uint32_t getBias(uint32_t index) const;
-		uint32_t getReciprocalFreq(uint32_t index) const;
-		uint16_t getFreqComplement(uint32_t index) const;
-		uint16_t getReciprocalShift(uint32_t index) const;
+		uint32_t getBias(uint8_t symbol) const;
+		uint32_t getReciprocalFreq(uint8_t symbol) const;
+		uint32_t getFreqComplement(uint8_t symbol) const;
+		uint32_t getReciprocalShift(uint32_t index) const;
 		uint32_t getFrequency(uint32_t index) const;
 		uint32_t getCumulative(uint32_t index) const;
 		uint8_t getAlphabet(uint32_t index) const;
@@ -73,8 +73,8 @@ namespace rANS {
 		uint32_t _maxEncoderState[ALPHABET_SIZE]{ 0 };		// (Exclusive) upper bound of pre-normalization interval
 		uint32_t _bias[ALPHABET_SIZE]{ 0 };					// Bias
 		uint32_t _reciprocalFreq[ALPHABET_SIZE]{ 0 };		// Fixed-point reciprocal frequency
-		uint16_t _frequencyComplement[ALPHABET_SIZE]{ 0 };	// Complement of frequency: (1 << scale_bits) - freq
-		uint16_t _reciprocalShift[ALPHABET_SIZE]{ 0 };		// Reciprocal shift
+		uint32_t _frequencyComplement[ALPHABET_SIZE]{ 0 };	// Complement of frequency: (1 << scale_bits) - freq
+		uint32_t _reciprocalShift[ALPHABET_SIZE]{ 0 };		// Reciprocal shift
 		uint32_t _frequencies[ALPHABET_SIZE]{ 0 };
 		uint32_t _cumulatives[ALPHABET_SIZE + 1]{ 0 };
 	};

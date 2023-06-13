@@ -9,9 +9,17 @@
 #include "rANSCompressor.hpp"
 #include "Comparer.hpp"
 
-#define rANS_test_FILE_TO_CONSOLE 1
-#define rANS_test_FILE 0
+#define rANS_test_FILE_TO_CONSOLE 0
+#define rANS_test_FILE 1
 #define rANS_test_MESSAGE 0
+
+#define PROGRAM_PATH "D:\\Dev\\rANS Compressor\\rANS Compressor\\"
+//#define PROGRAM_PATH "C:\\Personal\\Repositories\\rANS-Compressor\\rANS Compressor\\"
+
+#define LONG_LOREM_IPSUM "longLoremIpsum"
+#define BOOK "book"
+#define BOOK_PART "bookPart"
+#define PAN_TADEUSZ "PanTadeusz"
 
 using namespace rANS;
 
@@ -23,16 +31,14 @@ using namespace rANS;
 
 int main()
 {
-    std::string PATH = "C:\\Personal\\Repositories\\rANS-Compressor\\rANS Compressor\\";
-    //std::string PATH = "D:\\Dev\\rANS Compressor\\rANS Compressor\\";
+    std::string PATH = PROGRAM_PATH;
 
 #if rANS_test_FILE == 1
 
-    std::shared_ptr<std::string> buffer;
-    // ---------- File encoding and decoding. ----------
-    std::string inputFilename = "data.txt";
-
     std::cout << "-------------------- Encoding and decoding file --------------------\n\n";
+
+    std::shared_ptr<std::string> buffer;
+    std::string inputFilename = LONG_LOREM_IPSUM;
 
     SymbolInformation testingData;
     buffer = testingData.loadDataFromFile(PATH + inputFilename);
@@ -46,9 +52,9 @@ int main()
     rANSCompressor compressor;
 
     compressor.encodeFile(PATH + inputFilename);
-    compressor.decodeFile(PATH + "encoded.txt", PATH + "symbolInformations.txt");
+    compressor.decodeFile(PATH + "encoded", PATH + "symbolInformations.txt"); // WARNING .txt DELETED FROM encoded and decoded file!!!
 
-    bool result = Comparer::compareFiles(PATH + inputFilename, PATH + "decoded.txt");
+    bool result = Comparer::compareFiles(PATH + inputFilename, PATH + "decoded");
     std::cout << (result == true ? "File encoded and decoded successfully!\n" : "Something went wrong!\n") << std::endl;
 
     CompressionDetails fileEncodingDetails;
@@ -128,8 +134,8 @@ int main()
     std::cout << "------------------------- From file -------------------------\n";
    
     std::shared_ptr<std::string> fromFileBuff = std::make_shared<std::string>();
-    std::string fileName = "data";
-    //std::string fileName = "data.txt";
+    std::string fileName = LONG_LOREM_IPSUM;
+
     std::string path = PATH + fileName;
     std::string encodedFile = "";
     std::string decodedFile = "";
@@ -137,10 +143,6 @@ int main()
     SymbolInformation infoFromFile;
     fromFileBuff = infoFromFile.loadDataFromFile(path);
     infoFromFile.toFile();
-
-    //size_t sis = std::string::max_size();
-
-    //std::cout << "String max size: " << sis << std::endl;
 
     rANSCompressor encoder;
     encodedFile = encoder.encode(*fromFileBuff, infoFromFile);

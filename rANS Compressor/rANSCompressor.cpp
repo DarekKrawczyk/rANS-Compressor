@@ -47,7 +47,7 @@ uint32_t rANS::rANSCompressor::encodeFile(std::string pathOfFileToEncode)
 	symbolInfo.toFile();
 
 	//Create folder and file that is result encoded message.
-	_outputFile.open("encoded.txt");
+	_outputFile.open("encoded", std::ofstream::binary);
 
 	//Load symbol information and reset all of the buffers.
 	_symbolInformation = symbolInfo;
@@ -88,7 +88,7 @@ uint32_t rANS::rANSCompressor::encodeFile(std::string pathOfFileToEncode)
 
 	//Get file path
 	size_t index = pathOfFileToEncode.find_last_of('\\');
-	std::string path = pathOfFileToEncode.substr(0, pathOfFileToEncode.length() - (pathOfFileToEncode.length() - index)) + "\\encoded.txt";
+	std::string path = pathOfFileToEncode.substr(0, pathOfFileToEncode.length() - (pathOfFileToEncode.length() - index)) + "\\encoded";
 	
 	//Get file size.
 	std::filesystem::path encodedFile{path};
@@ -217,25 +217,21 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 		//Read symbols from file.
 		encodedData = std::string((std::istreambuf_iterator<char>(file)),
 			std::istreambuf_iterator<char>());
-		std::vector<int> indexes;
-		for (int i = 0; i < encodedData.length(); i++) {
-			if ((i + 1) < encodedData.length() and encodedData[i] == '\r' and encodedData[i + 1] == '\n') {
-				indexes.push_back(i);
-			}
-		}
-		for (int i = indexes.size(); i > 0; i--) {
-			encodedData.erase(indexes[i-1], 1);
-		}
-		for (int i = 0; i < _encodedBuffer.length(); i++) {
-			if (_encodedBuffer[i] != encodedData[i]) {
-				//indexes.push_back(i);
-				std::cout << "tt\n";
-			}
-		}
-		//encodedData = "";
-		//char character;
-		//while (file.get(character)) {
-		//	encodedData += character;
+
+		//std::vector<int> indexes;
+		//for (int i = 0; i < encodedData.length(); i++) {
+		//	if ((i + 1) < encodedData.length() and encodedData[i] == '\r' and encodedData[i + 1] == '\n') {
+		//		indexes.push_back(i);
+		//	}
+		//}
+		//for (int i = indexes.size(); i > 0; i--) {
+		//	encodedData.erase(indexes[i-1], 1);
+		//}
+		//for (int i = 0; i < _encodedBuffer.length(); i++) {
+		//	if (_encodedBuffer[i] != encodedData[i]) {
+		//		//indexes.push_back(i);
+		//		std::cout << "tt\n";
+		//	}
 		//}
 
 		file.close();
@@ -278,7 +274,7 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 	std::reverse(_decodedBuffer.begin(), _decodedBuffer.end());
 
 	//Opening result file.
-	_outputFile.open("decoded.txt");
+	_outputFile.open("decoded", std::ofstream::binary);
 
 	//Save result to file.
 	_outputFile.write(_decodedBuffer.c_str(), sizeof(char) * _decodedBuffer.size());
@@ -292,7 +288,7 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 
 	//Get file path
 	size_t index = pathOfFileToDecode.find_last_of('\\');
-	std::string path = pathOfFileToDecode.substr(0, pathOfFileToDecode.length() - (pathOfFileToDecode.length() - index)) + "\\decoded.txt";
+	std::string path = pathOfFileToDecode.substr(0, pathOfFileToDecode.length() - (pathOfFileToDecode.length() - index)) + "\\decoded";
 
 	//Get file size.
 	std::filesystem::path decodedFile{path};
@@ -369,10 +365,13 @@ void rANS::rANSCompressor::decodeStep() {
 
 	//Based on calculated mask decode symbol and save it into buffer.
 	uint8_t symbol = _symbolInformation.getSymbol(_decoderState & mask);
+	//if (symbol == '\n') {
+	//	_decodedBuffer.push_back('\r');
+	//}
 	_decodedBuffer.push_back(symbol);
 
-	std::string rev = _decodedBuffer;
-	std::reverse(rev.begin(), rev.end());
+	//std::string rev = _decodedBuffer;
+	//std::reverse(rev.begin(), rev.end());
 
 	//After decoding symbol, its time to calculate next _decoderState value. 
 	uint32_t blockID = _decoderState >> _symbolInformation.getN();
@@ -428,9 +427,12 @@ void rANS::rANSCompressor::write8bits(uint8_t buffer)
 	_encodedBuffer += buffer;
 	//_outputFile << buffer;
 	std::string s = "";
-	s += buffer;
 	if (buffer == '\r') {
 		//std::cout << "tu\n";
 	}
-	_outputFile.write(s.c_str(), sizeof(char)*s.size());
+	if (buffer == '\n') {
+	//	s += '\r';
+	}
+	s += buffer;
+	_outputFile.write(s.c_str(), sizeof(uint8_t)*s.size());
 }

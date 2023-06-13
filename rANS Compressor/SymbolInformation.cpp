@@ -155,9 +155,9 @@ uint32_t rANS::SymbolInformation::getLowRenormBoundary() const
 	return _renormLow;
 }
 
-uint32_t rANS::SymbolInformation::getMaxEncoderState(uint32_t index) const
+uint32_t rANS::SymbolInformation::getMaxEncoderState(uint8_t symbol) const
 {
-	return _maxEncoderState[index];
+	return _maxEncoderState[symbol];
 }
 
 uint8_t rANS::SymbolInformation::getSymbol(uint32_t index) const
@@ -165,22 +165,22 @@ uint8_t rANS::SymbolInformation::getSymbol(uint32_t index) const
 	return _symbols[index];
 }
 
-uint32_t rANS::SymbolInformation::getBias(uint32_t index) const
+uint32_t rANS::SymbolInformation::getBias(uint8_t symbol) const
 {
-	return _bias[index];
+	return _bias[symbol];
 }
 
-uint32_t rANS::SymbolInformation::getReciprocalFreq(uint32_t index) const
+uint32_t rANS::SymbolInformation::getReciprocalFreq(uint8_t symbol) const
 {
-	return _reciprocalFreq[index];
+	return _reciprocalFreq[symbol];
 }
 
-uint16_t rANS::SymbolInformation::getFreqComplement(uint32_t index) const
+uint32_t rANS::SymbolInformation::getFreqComplement(uint8_t symbol) const
 {
-	return _frequencyComplement[index];
+	return _frequencyComplement[symbol];
 }
 
-uint16_t rANS::SymbolInformation::getReciprocalShift(uint32_t index) const
+uint32_t rANS::SymbolInformation::getReciprocalShift(uint32_t index) const
 {
 	return _reciprocalShift[index];
 }
