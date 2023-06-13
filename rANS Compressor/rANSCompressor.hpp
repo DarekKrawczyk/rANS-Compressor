@@ -45,7 +45,7 @@ namespace rANS {
 		std::ofstream _outputFile;
 
 	private:
-		void encodeStep(uint32_t symbol, bool toBuffer = true);
+		void encodeStep(uint8_t symbol, bool toBuffer = true);
 		void decodeStep();
 		uint8_t read8bits();
 		void write8bits(uint8_t buffer);

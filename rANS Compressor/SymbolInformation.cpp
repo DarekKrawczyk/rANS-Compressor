@@ -278,11 +278,8 @@ std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::stri
 	std::ifstream file(path, std::ios_base::binary);
 	if (file.is_open()) {
 		//Read symbols from file.
-		*buffer = "";
-		char character;
-		while (file.get(character)) {
-			*buffer += character;
-		}
+		*buffer = std::string((std::istreambuf_iterator<char>(file)),
+			std::istreambuf_iterator<char>());
 
 		bufferSize = buffer->length();
 		file.close();
@@ -397,12 +394,12 @@ void rANS::SymbolInformation::printData() {
 void rANS::SymbolInformation::calculateMetric(const std::string& dataBuffer) {
 	//Fill alphabet with default values.
 	for (int i = 0; i < ALPHABET_SIZE; i++) {
-		_alphabet += (char)i;
+		_alphabet += (uint8_t)i;
 	}
 
 	//Calculate frequencies.
 	for (int i = 0; i < dataBuffer.length(); i++) {
-		_frequencies[dataBuffer[i]]++;
+		_frequencies[(uint8_t)dataBuffer[i]]++;
 	}
 
 	//Calculate cumulative frequencies.

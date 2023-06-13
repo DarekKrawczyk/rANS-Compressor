@@ -9,9 +9,9 @@
 #include "rANSCompressor.hpp"
 #include "Comparer.hpp"
 
-#define rANS_test_FILE_TO_CONSOLE 0
+#define rANS_test_FILE_TO_CONSOLE 1
 #define rANS_test_FILE 0
-#define rANS_test_MESSAGE 1
+#define rANS_test_MESSAGE 0
 
 using namespace rANS;
 
@@ -23,7 +23,8 @@ using namespace rANS;
 
 int main()
 {
-    std::string PATH = "D:\\Dev\\rANS Compressor\\rANS Compressor\\";
+    std::string PATH = "C:\\Personal\\Repositories\\rANS-Compressor\\rANS Compressor\\";
+    //std::string PATH = "D:\\Dev\\rANS Compressor\\rANS Compressor\\";
 
 #if rANS_test_FILE == 1
 
@@ -64,9 +65,9 @@ int main()
     std::cout << "File size after decoding: " << fileDecodingDetails.getObjectSize() << "[B]" << std::endl;
     std::cout << std::endl;
 
-    double filenom = fileEncodingDetails.getObjectSize();
-    double filede = fileDecodingDetails.getObjectSize();
-    double fileCompressionRation = filenom / filede;
+    double fileEncodedSize = fileEncodingDetails.getObjectSize();
+    double fileDecodedSize = fileDecodingDetails.getObjectSize();
+    double fileCompressionRation = fileDecodedSize / fileEncodedSize;
     std::cout << "File compression ratio: " << fileCompressionRation << std::endl;
     std::cout << std::endl;
     std::cout << std::endl;
@@ -78,7 +79,9 @@ int main()
     std::cout << "-------------------- Encoding and decoding message --------------------\n\n";
 
     std::shared_ptr<std::string> messageBuffer = std::make_shared<std::string>();
-    *messageBuffer = "Ala ma kota a kot ma Ale!";
+    //*messageBuffer = "ą";
+    *messageBuffer = "On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains.O";
+    //*messageBuffer = "Ala ma kota a kot ma Ale!";
     //*messageBuffer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
     //std::string message = "ala ma kota a kot ma ale!";
     std::string encodedMessage = "";
@@ -125,12 +128,19 @@ int main()
     std::cout << "------------------------- From file -------------------------\n";
    
     std::shared_ptr<std::string> fromFileBuff = std::make_shared<std::string>();
-    std::string path = PATH + "data.txt";
+    std::string fileName = "data";
+    //std::string fileName = "data.txt";
+    std::string path = PATH + fileName;
     std::string encodedFile = "";
     std::string decodedFile = "";
 
     SymbolInformation infoFromFile;
     fromFileBuff = infoFromFile.loadDataFromFile(path);
+    infoFromFile.toFile();
+
+    //size_t sis = std::string::max_size();
+
+    //std::cout << "String max size: " << sis << std::endl;
 
     rANSCompressor encoder;
     encodedFile = encoder.encode(*fromFileBuff, infoFromFile);

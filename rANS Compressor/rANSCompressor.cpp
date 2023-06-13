@@ -62,7 +62,8 @@ uint32_t rANS::rANSCompressor::encodeFile(std::string pathOfFileToEncode)
 	//For each symbol in buffer perform encoding operation.
 	size_t size = _symbolInformation.getBufferSize();
 	for (size_t i = 0; i < size; i++) {
-		this->encodeStep(dataBuffer->at(i), false);
+		uint8_t sign = dataBuffer->at(i);
+		this->encodeStep(sign, false);
 	}
 
 	//Write state of encoder into buffer. _encoderState variable is uint32_t thus 4 bytes.
@@ -120,7 +121,8 @@ std::string rANS::rANSCompressor::encode(const std::string& dataBuffer, const Sy
 	//For each symbol in buffer perform encoding operation.
 	size_t size = _symbolInformation.getBufferSize();
 	for (size_t i = 0; i < size; i++) {
-		this->encodeStep(dataBuffer[i]);
+		uint8_t sign = dataBuffer[i];
+		this->encodeStep(sign);
 	}
 
 	//Write state of encoder into buffer. _encoderState variable is uint32_t thus 4 bytes.
@@ -152,7 +154,7 @@ std::string rANS::rANSCompressor::encode(const std::string& dataBuffer, const Sy
 /// Encode a single symbol.
 /// </summary>
 /// <param name="symbol">Symbol to encode.</param>
-void rANS::rANSCompressor::encodeStep(uint32_t symbol, bool toBuffer) {
+void rANS::rANSCompressor::encodeStep(uint8_t symbol, bool toBuffer) {
 #if Implementation == 0
     uint32_t tempEncoderState = _encoderState;
     uint32_t maxEncoderState = _symbolInformation.getMaxEncoderState(symbol);
@@ -213,11 +215,28 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 		//std::cout << pathOfFileToDecode << " - file opened successfully!" << std::endl;
 
 		//Read symbols from file.
-		encodedData = "";
-		char character;
-		while (file.get(character)) {
-			encodedData += character;
+		encodedData = std::string((std::istreambuf_iterator<char>(file)),
+			std::istreambuf_iterator<char>());
+		std::vector<int> indexes;
+		for (int i = 0; i < encodedData.length(); i++) {
+			if ((i + 1) < encodedData.length() and encodedData[i] == '\r' and encodedData[i + 1] == '\n') {
+				indexes.push_back(i);
+			}
 		}
+		for (int i = indexes.size(); i > 0; i--) {
+			encodedData.erase(indexes[i-1], 1);
+		}
+		for (int i = 0; i < _encodedBuffer.length(); i++) {
+			if (_encodedBuffer[i] != encodedData[i]) {
+				//indexes.push_back(i);
+				std::cout << "tt\n";
+			}
+		}
+		//encodedData = "";
+		//char character;
+		//while (file.get(character)) {
+		//	encodedData += character;
+		//}
 
 		file.close();
 	}
@@ -262,7 +281,8 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 	_outputFile.open("decoded.txt");
 
 	//Save result to file.
-	_outputFile << _decodedBuffer;
+	_outputFile.write(_decodedBuffer.c_str(), sizeof(char) * _decodedBuffer.size());
+	//_outputFile << _decodedBuffer;
 
 	//Closing result file.
 	_outputFile.close();
@@ -320,6 +340,9 @@ std::string rANS::rANSCompressor::decode(const SymbolInformation& info, const st
 	//For each symbol in buffer perform decoding operation.
 	size_t size = _symbolInformation.getBufferSize();
 	for (size_t i = 0; i < size; i++) {
+		if (i == 8660) {
+			std::cout << "\n";
+		}
 		this->decodeStep();
 	}
 
@@ -345,8 +368,11 @@ void rANS::rANSCompressor::decodeStep() {
 	uint32_t mask = _symbolInformation.getMask();
 
 	//Based on calculated mask decode symbol and save it into buffer.
-	uint32_t symbol = _symbolInformation.getSymbol(_decoderState & mask);
+	uint8_t symbol = _symbolInformation.getSymbol(_decoderState & mask);
 	_decodedBuffer.push_back(symbol);
+
+	std::string rev = _decodedBuffer;
+	std::reverse(rev.begin(), rev.end());
 
 	//After decoding symbol, its time to calculate next _decoderState value. 
 	uint32_t blockID = _decoderState >> _symbolInformation.getN();
@@ -399,5 +425,12 @@ uint8_t rANS::rANSCompressor::read8bits() {
 
 void rANS::rANSCompressor::write8bits(uint8_t buffer)
 {
-	_outputFile << buffer;
+	_encodedBuffer += buffer;
+	//_outputFile << buffer;
+	std::string s = "";
+	s += buffer;
+	if (buffer == '\r') {
+		//std::cout << "tu\n";
+	}
+	_outputFile.write(s.c_str(), sizeof(char)*s.size());
 }
