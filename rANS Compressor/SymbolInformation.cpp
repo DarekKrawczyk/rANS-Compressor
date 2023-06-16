@@ -14,10 +14,10 @@ rANS::SymbolInformation::SymbolInformation() {
 /// Default constructor, load data buffer and calculates metric of the symbols.
 /// </summary>
 /// <param name="dataBuffer">Data</param>
-rANS::SymbolInformation::SymbolInformation(const std::string& dataBuffer) {
+rANS::SymbolInformation::SymbolInformation(const std::shared_ptr<std::list<uint8_t>>& dataBuffer) {
 	//_dataBuffer = dataBuffer;
 	_alphabet = "";
-	bufferSize = dataBuffer.length();
+	bufferSize = dataBuffer->size();
 	this->calculateMetric(dataBuffer);
 }
 
@@ -273,17 +273,26 @@ bool rANS::SymbolInformation::isEqual(const SymbolInformation& other)
 /// </summary>
 /// <param name="path">Path of the file.</param>
 /// <returns>True if operation was successful, otherwise false.</returns>
-std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::string path) {
-	std::shared_ptr<std::string> buffer = std::make_shared<std::string>();
+std::shared_ptr<std::list<uint8_t>> rANS::SymbolInformation::loadDataFromFile(std::string path) {
+	std::shared_ptr<std::list<uint8_t>> buffer = std::make_shared<std::list<uint8_t>>();
 	std::ifstream file(path, std::ios_base::binary);
 	if (file.is_open()) {
 		//Read symbols from file.
-		*buffer = std::string((std::istreambuf_iterator<char>(file)),
-			std::istreambuf_iterator<char>());
+		// 
+		// Seek to the end of the file to determine its size
+		file.seekg(0, std::ios::end);
+		std::streamsize fileSize = file.tellg();
+		file.seekg(0, std::ios::beg);
 
-		bufferSize = buffer->length();
+		// Read the contents of the file into the list
+		char byte;
+		while (file.get(byte)) {
+			buffer->push_back(static_cast<uint8_t>(byte));
+		}
+
+		bufferSize = buffer->size();
 		file.close();
-		this->calculateMetric(*buffer);
+		this->calculateMetric(buffer);
 	}
 	else {
 		std::cout << path << " - failed to open the file!!!" << std::endl;
@@ -391,15 +400,15 @@ void rANS::SymbolInformation::printData() {
 /// <summary>
 /// Calculate metric for symbols.
 /// </summary>
-void rANS::SymbolInformation::calculateMetric(const std::string& dataBuffer) {
+void rANS::SymbolInformation::calculateMetric(const std::shared_ptr<std::list<uint8_t>>& dataBuffer) {
 	//Fill alphabet with default values.
 	for (int i = 0; i < ALPHABET_SIZE; i++) {
 		_alphabet += (uint8_t)i;
 	}
 
 	//Calculate frequencies.
-	for (int i = 0; i < dataBuffer.length(); i++) {
-		_frequencies[(uint8_t)dataBuffer[i]]++;
+	for (std::list<uint8_t>::iterator it = dataBuffer->begin(); it != dataBuffer->end(); ++it) {
+		_frequencies[*it]++;
 	}
 
 	//Calculate cumulative frequencies.

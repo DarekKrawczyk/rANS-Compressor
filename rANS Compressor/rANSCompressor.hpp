@@ -27,8 +27,8 @@ namespace rANS {
 		uint32_t encodeFile(std::string pathOfFileToEncode);
 		uint32_t decodeFile(std::string pathOfFileToDecode, std::string pathOfFileWithSymbolInfo);
 
-		std::string encode(const std::string& datBuffer, const SymbolInformation& info);
-		std::string decode(const SymbolInformation& info, const std::string& encodedData);
+		std::shared_ptr<std::list<uint8_t>> encode(const std::shared_ptr<std::list<uint8_t>>& dataBuffer, const SymbolInformation& info);
+		std::shared_ptr<std::list<uint8_t>> decode(const SymbolInformation& info, const std::shared_ptr<std::list<uint8_t>>& encodedData);
 
 		void printData();
 		CompressionDetails getEncodingDetails() const;
@@ -38,8 +38,8 @@ namespace rANS {
 		SymbolInformation _symbolInformation;
 		uint32_t _encoderState;
 		uint32_t _decoderState;
-		std::string _encodedBuffer;
-		std::string _decodedBuffer;
+		std::shared_ptr<std::list<uint8_t>> _encodedBuffer;
+		std::shared_ptr<std::list<uint8_t>> _decodedBuffer;
 		CompressionDetails _encodingDetails;
 		CompressionDetails _decodingDetails;
 		std::ofstream _outputFile;

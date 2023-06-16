@@ -4,7 +4,7 @@
 /// Default constructor of rANS compressor.
 /// </summary>
 rANS::rANSCompressor::rANSCompressor() {
-	_encodedBuffer = "";
+	_encodedBuffer = std::make_shared<std::list<uint8_t>>();;
 }
 
 /// <summary>
@@ -13,7 +13,7 @@ rANS::rANSCompressor::rANSCompressor() {
 /// <param name="info">Symbols information data.</param>
 rANS::rANSCompressor::rANSCompressor(const SymbolInformation & info) {
 	_symbolInformation = info;
-	_encodedBuffer = "";
+	_encodedBuffer = std::make_shared<std::list<uint8_t>>();;
 }
 
 /// <summary>
@@ -22,7 +22,7 @@ rANS::rANSCompressor::rANSCompressor(const SymbolInformation & info) {
 /// <param name="info">Symbols information data.</param>
 rANS::rANSCompressor::rANSCompressor(const SymbolInformation* info) {
 	_symbolInformation = *info;
-	_encodedBuffer = "";
+	_encodedBuffer = std::make_shared<std::list<uint8_t>>();;
 }
 
 /// <summary>
@@ -39,7 +39,7 @@ rANS::rANSCompressor::~rANSCompressor() {
 uint32_t rANS::rANSCompressor::encodeFile(std::string pathOfFileToEncode)
 {
 	//Create buffer
-	std::shared_ptr<std::string> dataBuffer = std::make_shared<std::string>();
+	std::shared_ptr<std::list<uint8_t>> dataBuffer = std::make_shared<std::list<uint8_t>>();
 
 	//Open to be encoded and calculate symbol information.
 	SymbolInformation symbolInfo;
@@ -52,17 +52,16 @@ uint32_t rANS::rANSCompressor::encodeFile(std::string pathOfFileToEncode)
 	//Load symbol information and reset all of the buffers.
 	_symbolInformation = symbolInfo;
 	_decoderState = 0;
-	_decodedBuffer = "";
-	_encodedBuffer = "";
+	_decodedBuffer = std::make_shared<std::list<uint8_t>>();;
+	_encodedBuffer = std::make_shared<std::list<uint8_t>>();;
 	_encoderState = _symbolInformation.getLowRenormBoundary();		//Starting with low boundary value.
 
 	//Start measuring time.
 	std::chrono::steady_clock::time_point beginTime = std::chrono::high_resolution_clock::now();
 
 	//For each symbol in buffer perform encoding operation.
-	size_t size = _symbolInformation.getBufferSize();
-	for (size_t i = 0; i < size; i++) {
-		uint8_t sign = dataBuffer->at(i);
+	for (std::list<uint8_t>::iterator it = dataBuffer->begin(); it != dataBuffer->end(); ++it) {
+		uint8_t sign = *it;
 		this->encodeStep(sign, false);
 	}
 
@@ -107,12 +106,12 @@ uint32_t rANS::rANSCompressor::encodeFile(std::string pathOfFileToEncode)
 /// </summary>
 /// <param name="info">Object with data to encode with necessary information about symbols.</param>
 /// <returns>Returns data in encoded format.</returns>
-std::string rANS::rANSCompressor::encode(const std::string& dataBuffer, const SymbolInformation& info) {
+std::shared_ptr<std::list<uint8_t>> rANS::rANSCompressor::encode(const std::shared_ptr<std::list<uint8_t>>& dataBuffer, const SymbolInformation& info) {
 	//Load symbol information and reset all of the buffers.
 	_symbolInformation = info;
 	_decoderState = 0;
-	_decodedBuffer = "";
-	_encodedBuffer = "";
+	_decodedBuffer = std::make_shared<std::list<uint8_t>>();
+	_encodedBuffer = std::make_shared<std::list<uint8_t>>();
 	_encoderState = _symbolInformation.getLowRenormBoundary();		//Starting with low boundary value.
 
 	//Start measuring time.
@@ -120,8 +119,8 @@ std::string rANS::rANSCompressor::encode(const std::string& dataBuffer, const Sy
 
 	//For each symbol in buffer perform encoding operation.
 	size_t size = _symbolInformation.getBufferSize();
-	for (size_t i = 0; i < size; i++) {
-		uint8_t sign = dataBuffer[i];
+	for (std::list<uint8_t>::iterator it = dataBuffer->begin(); it != dataBuffer->end(); ++it) {
+		uint8_t sign = *it;
 		this->encodeStep(sign);
 	}
 
@@ -134,17 +133,17 @@ std::string rANS::rANSCompressor::encode(const std::string& dataBuffer, const Sy
 	_encoderState = (_encoderState >> 8);
 	uint8_t lastSymbol4 = (_encoderState & (0xff));
 
-	_encodedBuffer += lastSymbol4;
-	_encodedBuffer += lastSymbol3;
-	_encodedBuffer += lastSymbol2;
-	_encodedBuffer += lastSymbol1;
+	_encodedBuffer->push_back(lastSymbol4);
+	_encodedBuffer->push_back(lastSymbol3);
+	_encodedBuffer->push_back(lastSymbol2);
+	_encodedBuffer->push_back(lastSymbol1);
 
 	//Finish measuring time.
 	std::chrono::steady_clock::time_point endTime = std::chrono::high_resolution_clock::now();
 	
 	//Fill information about encoding process.
 	_encodingDetails.setOperationTime(endTime - beginTime);
-	_encodingDetails.setObjectSize(_encodedBuffer.size());
+	_encodingDetails.setObjectSize(_encodedBuffer->size());
 	_encodingDetails.calculate();
 
 	return _encodedBuffer;
@@ -165,7 +164,7 @@ void rANS::rANSCompressor::encodeStep(uint8_t symbol, bool toBuffer) {
 			//Write last 8 bites into encoded buffer.
             uint8_t last8Bits = (uint8_t)(tempEncoderState & 0xff);
 			if (toBuffer == true) {
-				_encodedBuffer += last8Bits;
+				_encodedBuffer->push_back(last8Bits);
 			}
 			else {
 				this->write8bits(last8Bits);
@@ -242,27 +241,28 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 
 	//Load symbol information, encoded data and reset all of the buffers.
 	_symbolInformation = info;
-	_encodedBuffer = encodedData;
+	//_encodedBuffer = std::make_shared<std::list<uint8_t>>(encodedData);
 	_encoderState = 0;
-	_decodedBuffer = "";
+	_decodedBuffer = std::make_shared<std::list<uint8_t>>();
 	_decoderState = 0;
 
 	//Start measuring time.
 	std::chrono::steady_clock::time_point beginTime = std::chrono::high_resolution_clock::now();
 
 	//Initialize decoding - push last symbols of encoded data to decoder state;
-	uint8_t value = _encodedBuffer[_encodedBuffer.length() - 1];
+	//uint8_t value = _encodedBuffer[_encodedBuffer.length() - 1];
+	uint8_t value = _encodedBuffer->back();
 	_decoderState = value;
-	_encodedBuffer.pop_back();
-	uint8_t value2 = _encodedBuffer[_encodedBuffer.length() - 1];
+	_encodedBuffer->pop_back();
+	uint8_t value2 = _encodedBuffer->back();
 	_decoderState |= (value2 << 8);
-	_encodedBuffer.pop_back();
-	uint8_t value3 = _encodedBuffer[_encodedBuffer.length() - 1];
+	_encodedBuffer->pop_back();
+	uint8_t value3 = _encodedBuffer->back();
 	_decoderState |= (value3 << 16);
-	_encodedBuffer.pop_back();
-	uint8_t value4 = _encodedBuffer[_encodedBuffer.length() - 1];
+	_encodedBuffer->pop_back();
+	uint8_t value4 = _encodedBuffer->back();
 	_decoderState |= (value4 << 24);
-	_encodedBuffer.pop_back();
+	_encodedBuffer->pop_back();
 
 	//For each symbol in buffer perform decoding operation.
 	size_t size = _symbolInformation.getBufferSize();
@@ -271,17 +271,18 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 	}
 
 	//Reverse decoded buffer because data is decoded in reverse.
-	std::reverse(_decodedBuffer.begin(), _decodedBuffer.end());
+	//std::reverse(_decodedBuffer.begin(), _decodedBuffer.end());
+	_decodedBuffer->reverse();
 
 	//Opening result file.
-	_outputFile.open("decoded", std::ofstream::binary);
+	//_outputFile.open("decoded", std::ofstream::binary);
 
 	//Save result to file.
-	_outputFile.write(_decodedBuffer.c_str(), sizeof(char) * _decodedBuffer.size());
+	//_outputFile.write(_decodedBuffer.c_str(), sizeof(char) * _decodedBuffer.size());
 	//_outputFile << _decodedBuffer;
 
 	//Closing result file.
-	_outputFile.close();
+	//_outputFile.close();
 
 	//Finish measuring time.
 	std::chrono::steady_clock::time_point endTime = std::chrono::high_resolution_clock::now();
@@ -308,30 +309,30 @@ uint32_t rANS::rANSCompressor::decodeFile(std::string pathOfFileToDecode, std::s
 /// <param name="info">Information about encoded data.</param>
 /// <param name="encodedData">Encoded data.</param>
 /// <returns>Decoded data.</returns>
-std::string rANS::rANSCompressor::decode(const SymbolInformation& info, const std::string& encodedData) {
+std::shared_ptr<std::list<uint8_t>> rANS::rANSCompressor::decode(const SymbolInformation& info, const std::shared_ptr<std::list<uint8_t>>& encodedData) {
 	//Load symbol information, encoded data and reset all of the buffers.
 	_symbolInformation = info;
 	_encodedBuffer = encodedData;
 	_encoderState = 0;
-	_decodedBuffer = "";
+	_decodedBuffer = std::make_shared<std::list<uint8_t>>();
 	_decoderState = 0;
 
 	//Start measuring time.
 	std::chrono::steady_clock::time_point beginTime = std::chrono::high_resolution_clock::now();
 
 	//Initialize decoding - push last symbols of encoded data to decoder state;
-	uint8_t value = _encodedBuffer[_encodedBuffer.length() - 1];
+	uint8_t value = _encodedBuffer->back();
 	_decoderState = value;
-	_encodedBuffer.pop_back();
-	uint8_t value2 = _encodedBuffer[_encodedBuffer.length() - 1];
+	_encodedBuffer->pop_back();
+	uint8_t value2 = _encodedBuffer->back();
 	_decoderState |= (value2 << 8);
-	_encodedBuffer.pop_back();
-	uint8_t value3 = _encodedBuffer[_encodedBuffer.length() - 1];
+	_encodedBuffer->pop_back();
+	uint8_t value3 = _encodedBuffer->back();
 	_decoderState |= (value3 << 16);
-	_encodedBuffer.pop_back();
-	uint8_t value4 = _encodedBuffer[_encodedBuffer.length() - 1];
+	_encodedBuffer->pop_back();
+	uint8_t value4 = _encodedBuffer->back();
 	_decoderState |= (value4 << 24);
-	_encodedBuffer.pop_back();
+	_encodedBuffer->pop_back();
 
 	//For each symbol in buffer perform decoding operation.
 	size_t size = _symbolInformation.getBufferSize();
@@ -343,14 +344,15 @@ std::string rANS::rANSCompressor::decode(const SymbolInformation& info, const st
 	}
 
 	//Reverse decoded buffer because data is decoded in reverse.
-	std::reverse(_decodedBuffer.begin(), _decodedBuffer.end());
+	//std::reverse(_decodedBuffer.begin(), _decodedBuffer.end());
+	_decodedBuffer->reverse();
 
 	//Finish measuring time.
 	std::chrono::steady_clock::time_point endTime = std::chrono::high_resolution_clock::now();
 
 	//Fill information about decoding process.
 	_decodingDetails.setOperationTime(endTime - beginTime);
-	_decodingDetails.setObjectSize(_decodedBuffer.size());
+	_decodingDetails.setObjectSize(_decodedBuffer->size());
 	_decodingDetails.calculate();
 
 	return _decodedBuffer;
@@ -368,7 +370,7 @@ void rANS::rANSCompressor::decodeStep() {
 	//if (symbol == '\n') {
 	//	_decodedBuffer.push_back('\r');
 	//}
-	_decodedBuffer.push_back(symbol);
+	_decodedBuffer->push_back(symbol);
 
 	//std::string rev = _decodedBuffer;
 	//std::reverse(rev.begin(), rev.end());
@@ -384,8 +386,8 @@ void rANS::rANSCompressor::decodeStep() {
 	try {
 		if (_decoderState < boundary) {
 			do {
-				uint8_t sign = _encodedBuffer[_encodedBuffer.length() - 1];
-				_encodedBuffer.pop_back();
+				uint8_t sign = _encodedBuffer->back();
+				_encodedBuffer->pop_back();
 				_decoderState = (_decoderState << 8) | sign;
 			} while (_decoderState < boundary);
 		}
@@ -417,14 +419,14 @@ rANS::CompressionDetails rANS::rANSCompressor::getDecodingDetails() const
 /// </summary>
 /// <returns>Last byte from encoded buffer.</returns>
 uint8_t rANS::rANSCompressor::read8bits() {
-	uint8_t last8bits = _encodedBuffer[_encodedBuffer.length() - 1];
-	_encodedBuffer.pop_back();
+	uint8_t last8bits = _encodedBuffer->back();
+	_encodedBuffer->pop_back();
 	return last8bits;
 }
 
 void rANS::rANSCompressor::write8bits(uint8_t buffer)
 {
-	_encodedBuffer += buffer;
+	_encodedBuffer->push_back(buffer);
 	//_outputFile << buffer;
 	std::string s = "";
 	if (buffer == '\r') {

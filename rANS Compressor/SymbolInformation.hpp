@@ -4,6 +4,7 @@
 #include <fstream>
 #include <streambuf>
 #include <math.h>
+#include <list>
 
 #define mod %
 
@@ -20,13 +21,13 @@ namespace rANS {
 	*/
 	public:
 		SymbolInformation();
-		SymbolInformation(const std::string& dataBuffer);
+		SymbolInformation(const std::shared_ptr<std::list<uint8_t>>& dataBuffer);
 		SymbolInformation(const SymbolInformation& other);
 		SymbolInformation(const SymbolInformation* other);
 		~SymbolInformation();
 
-		std::shared_ptr<std::string> loadDataFromFile(std::string path);
-		void calculateMetric(const std::string& dataBuffer);
+		std::shared_ptr<std::list<uint8_t>> loadDataFromFile(std::string path);
+		void calculateMetric(const std::shared_ptr<std::list<uint8_t>>& dataBuffer);
 		void toFile(std::string path = "");
 		bool loadSymbolInfoFromFile(std::string path);
 		void printData();
