@@ -1,5 +1,11 @@
 #include "Comparer.hpp"
 
+/// <summary>
+/// Compare two files. 
+/// </summary>
+/// <param name="one">First file path.</param>
+/// <param name="another">Second file path.</param>
+/// <returns>True if files are the same, otherwise false.</returns>
 bool Comparer::compareFiles(std::string one, std::string another)
 {
 	std::string firstText = "";
@@ -33,10 +39,5 @@ bool Comparer::compareFiles(std::string one, std::string another)
 	else {
 		std::cout << one << " - failed to open the file!!!" << std::endl;
 	}
-	return false;
-}
-
-bool Comparer::compareBuffers()
-{
 	return false;
 }

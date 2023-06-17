@@ -5,17 +5,15 @@
 /// Default constructor.
 /// </summary>
 rANS::SymbolInformation::SymbolInformation() {
-	//_dataBuffer = "";
 	bufferSize = 0;
 	_alphabet = "";
 }
 
 /// <summary>
-/// Default constructor, load data buffer and calculates metric of the symbols.
+/// Default constructor, loads data buffer and calculates metric of the symbols.
 /// </summary>
 /// <param name="dataBuffer">Data</param>
 rANS::SymbolInformation::SymbolInformation(const std::shared_ptr<std::list<uint8_t>>& dataBuffer) {
-	//_dataBuffer = dataBuffer;
 	_alphabet = "";
 	bufferSize = dataBuffer->size();
 	this->calculateMetric(dataBuffer);
@@ -26,12 +24,9 @@ rANS::SymbolInformation::SymbolInformation(const std::shared_ptr<std::list<uint8
 /// </summary>
 /// <param name="other">Object from which to copy data.</param>
 rANS::SymbolInformation::SymbolInformation(const SymbolInformation* other) {
-	//Coping buffer and alphabet.
-	//this->_dataBuffer = other->_dataBuffer;
 	this->bufferSize = other->bufferSize;
 	this->_alphabet = other->_alphabet;
 
-	//Coping frequencies.
 	for (int i = 0; i < ALPHABET_SIZE; i++) {
 		this->_frequencies[i] = other->_frequencies[i];
 		this->_cumulatives[i] = other->_cumulatives[i];
@@ -43,12 +38,10 @@ rANS::SymbolInformation::SymbolInformation(const SymbolInformation* other) {
 		this->_frequencies[i] = other->_frequencies[i];
 	}
 
-	//Coping cumulative.
 	for (int i = 0; i < (ALPHABET_SIZE + 1); i++) {
 		this->_cumulatives[i] = other->_cumulatives[i];
 	}
 
-	//Coping symbols.
 	for (int i = 0; i < (1<<N); i++) {
 		this->_symbols[i] = other->_symbols[i];
 	}
@@ -59,12 +52,9 @@ rANS::SymbolInformation::SymbolInformation(const SymbolInformation* other) {
 /// </summary>
 /// <param name="other">Object from which to copy data.</param>
 rANS::SymbolInformation::SymbolInformation(const SymbolInformation& other) {
-	//Coping buffer and alphabet.
-	//this->_dataBuffer = other._dataBuffer;
 	this->bufferSize = other.bufferSize;
 	this->_alphabet = other._alphabet;
 
-	//Coping frequencies.
 	for (int i = 0; i < ALPHABET_SIZE; i++) {
 		this->_frequencies[i] = other._frequencies[i];
 		this->_cumulatives[i] = other._cumulatives[i];
@@ -76,12 +66,10 @@ rANS::SymbolInformation::SymbolInformation(const SymbolInformation& other) {
 		this->_frequencies[i] = other._frequencies[i];
 	}
 
-	//Coping cumulative.
 	for (int i = 0; i < (ALPHABET_SIZE + 1); i++) {
 		this->_cumulatives[i] = other._cumulatives[i];
 	}
 
-	//Coping symbols.
 	for (int i = 0; i < (1 << N); i++) {
 		this->_symbols[i] = other._symbols[i];
 	}
@@ -95,16 +83,6 @@ rANS::SymbolInformation::~SymbolInformation() {
 }
 #pragma endregion
 #pragma region Accessors
-//std::string rANS::SymbolInformation::getBuffer() const
-//{
-//	return _dataBuffer;
-//}
-//
-//char rANS::SymbolInformation::getBuffer(int index) const
-//{
-//	return _dataBuffer[index];
-//}
-//
 size_t rANS::SymbolInformation::getBufferSize() const
 {
 	return bufferSize;
@@ -190,11 +168,8 @@ uint32_t rANS::SymbolInformation::getReciprocalShift(uint8_t symbol) const
 /// Clear all data of the object.
 /// </summary>
 void rANS::SymbolInformation::clearData() {
-	//Clear data buffer.
-	//_dataBuffer.clear();
 	_alphabet.clear();
 
-	//Clear all of the symbol information.
 	for (int i = 0; i < ALPHABET_SIZE; i++) {
 		_maxEncoderState[i] = 0;
 		_bias[i] = 0;
@@ -213,6 +188,11 @@ void rANS::SymbolInformation::clearData() {
 	}
 }
 
+/// <summary>
+/// Check if SymbolInformation object is the same.
+/// </summary>
+/// <param name="other">Object to compare to.</param>
+/// <returns>True if objects are the same, otherwise false.</returns>
 bool rANS::SymbolInformation::isEqual(const SymbolInformation& other)
 {
 	if (this->bufferSize != other.bufferSize) {
@@ -269,6 +249,30 @@ bool rANS::SymbolInformation::isEqual(const SymbolInformation& other)
 }
 
 /// <summary>
+/// Creates buffer for rANS compressor.
+/// </summary>
+/// <param name="path">Path of file to load.</param>
+/// <returns>Shared pointer to data buffer.</returns>
+std::shared_ptr<std::list<uint8_t>> rANS::SymbolInformation::LoadBuffer(std::string path)
+{
+	std::shared_ptr<std::list<uint8_t>> buffer = std::make_shared<std::list<uint8_t>>();
+	std::ifstream file(path, std::ios_base::binary);
+	if (file.is_open()) {
+
+		char byte;
+		while (file.get(byte)) {
+			buffer->push_back(static_cast<uint8_t>(byte));
+		}
+		file.close();
+		return buffer;
+	}
+	else {
+		std::cout <<"Error: Failed to open file - " << path << std::endl;
+		return nullptr;
+	}
+}
+
+/// <summary>
 /// Load data from file and calculate it's metric.
 /// </summary>
 /// <param name="path">Path of the file.</param>
@@ -278,7 +282,6 @@ std::shared_ptr<std::list<uint8_t>> rANS::SymbolInformation::loadDataFromFile(st
 	std::ifstream file(path, std::ios_base::binary);
 	if (file.is_open()) {
 		//Read symbols from file.
-		// 
 		// Seek to the end of the file to determine its size
 		file.seekg(0, std::ios::end);
 		std::streamsize fileSize = file.tellg();
@@ -293,41 +296,30 @@ std::shared_ptr<std::list<uint8_t>> rANS::SymbolInformation::loadDataFromFile(st
 		bufferSize = buffer->size();
 		file.close();
 		this->calculateMetric(buffer);
+		return buffer;
 	}
 	else {
-		std::cout << path << " - failed to open the file!!!" << std::endl;
+		std::cout << "Error: Failed to open file - " << path << std::endl;
+		return nullptr;
+	}
+}
+
+/// <summary>
+/// Creates buffer from string.
+/// </summary>
+/// <param name="data">Data</param>
+/// <returns>shared_ptr to data buffer. If data paremeter was empty return nullptr.</returns>
+std::shared_ptr<std::list<uint8_t>> rANS::SymbolInformation::ToBuffer(const std::string& data)
+{
+	if (data.length() == 0) {
+		return nullptr;
+	}
+	std::shared_ptr<std::list<uint8_t>> buffer = std::make_shared<std::list<uint8_t>>();
+	for (char symbol : data) {
+		buffer->push_back(symbol);
 	}
 	return buffer;
 }
-
-/*
-std::shared_ptr<std::string> rANS::SymbolInformation::loadDataFromFile(std::string path) {
-	bool result = false;
-	std::shared_ptr<std::string> buffer = std::make_shared<std::string>();
-	std::ifstream file(path, std::ios_base::binary);
-	if (file.is_open()) {
-		//std::cout << path << " - file opened successfully!" << std::endl;
-
-		//Read symbols from file.
-		*buffer = "";
-		char character;
-		while (file.get(character)) {
-			*buffer += character;
-		}
-
-		bufferSize = buffer->length();
-		result = true;
-		file.close();
-		this->calculateMetric(*buffer);
-	}
-	else {
-		std::cout << path << " - failed to open the file!!!" << std::endl;
-	}
-	return buffer;
-}
-
-
-*/
 
 /// <summary>
 /// Print all information about the symbols.
@@ -421,19 +413,12 @@ void rANS::SymbolInformation::calculateMetric(const std::shared_ptr<std::list<ui
 	uint32_t m = _cumulatives[256];
 
 	//rygorous code to resample, optimize and calculate frequencies and cumulative frequencies.
-	// resample distribution based on cumulative freqs
 	for (int i = 1; i <= 256; i++)
 		_cumulatives[i] = ((uint64_t)_scale * _cumulatives[i]) / m;
 
-	// if we nuked any non-0 frequency symbol to 0, we need to steal
-	// the range to make the frequency nonzero from elsewhere.
-	//
-	// this is not at all optimal, i'm just doing the first thing that comes to mind.
 	for (int i = 0; i < 256; i++) {
 		if (_frequencies[i] && _cumulatives[i + 1] == _cumulatives[i]) {
-			// symbol i was set to zero freq
 
-			// find best symbol to steal frequency from (try to steal from low-freq ones)
 			uint32_t best_freq = ~0u;
 			int best_steal = -1;
 			for (int j = 0; j < 256; j++) {
@@ -444,7 +429,6 @@ void rANS::SymbolInformation::calculateMetric(const std::shared_ptr<std::list<ui
 				}
 			}
 
-			// and steal from it!
 			if (best_steal < i) {
 				for (int j = best_steal + 1; j <= i; j++)
 					_cumulatives[j]--;
@@ -458,60 +442,9 @@ void rANS::SymbolInformation::calculateMetric(const std::shared_ptr<std::list<ui
 
 	m = _cumulatives[256];
 
-	// calculate updated freqs and make sure we didn't screw anything up
 	for (int i = 0; i < 256; i++) {
-		// calc updated freq
 		_frequencies[i] = _cumulatives[i + 1] - _cumulatives[i];
 	}
-
-	//My attempt to optimize frequencies and cumulative frequencies.
-
-	////Check if buffor size is dividable.
-	//int optimalOccurrenceTab[occurrences] = { 0 };
-	//int dividor = 1;
-	//bool possible = true;
-	//for (int i = 2; i <= 9; i++) {
-	//	if (_bufferSize % i == 0) {
-	//		//Go through occurences and find out if it is possible to divide by that dividor.
-	//		for (int j = 0; j < occurrences; j++) {
-	//			if (occurrenceTab[j] % i == 0) {
-	//				optimalOccurrenceTab[j] = occurrenceTab[j] / i;
-	//				possible = true;
-	//			}
-	//			else {
-	//				possible = false;
-	//				break;
-	//			}
-	//		}
-	//		if (possible == true) {
-	//			dividor = i;
-	//		}
-	//	}
-	//}
-	//if (dividor > 1) {
-	//	std::cout << "Optimalized by: " << dividor << std::endl;
-	//	_M = _bufferSize / dividor;
-	//	for (int i = 0; i < _alphabetSize; i++) {
-	//		_frequencies[i] = optimalOccurrenceTab[i];
-	//	}
-	//}
-	//else {
-	//	std::cout << "Not optimalized!"<< std::endl;
-	//	_M = _bufferSize;
-	//	for (int i = 0; i < _alphabetSize; i++) {
-	//		_frequencies[i] = occurrenceTab[i];
-	//	}
-	//}
-
-	////Calculate Cumulative
-	//for (int i = 0; i < _alphabetSize; i++) {
-	//	if (i == 0) {
-	//		_cumulatives[i] = 0;
-	//		continue;
-	//	}
-	//	_cumulatives[i] = _cumulatives[i - 1] + _frequencies[i - 1];
-	//}
-
 
 	for (int s = 0; s < 256; s++) {
 		for (uint32_t i = _cumulatives[s]; i < _cumulatives[s + 1]; i++) {
@@ -521,38 +454,23 @@ void rANS::SymbolInformation::calculateMetric(const std::shared_ptr<std::list<ui
 	
 	//Calculate other information about symbols.
 	this->calculateSymbolsInformation();
-
-	//For debug
-	uint32_t tabF[256];
-	uint32_t tabC[256];
-	uint32_t tabTheSame[256];
-	uint32_t tabTheSame2[256];
-	uint32_t tabS[1<<N];
-	for (int i = 0; i < ALPHABET_SIZE; i++) {
-		tabF[i] = _frequencies[i];
-		tabC[i] = _cumulatives[i];
-		tabTheSame[i] = _frequencyComplement[i];
-		tabTheSame2[i] = _reciprocalFreq[i];
-	}
-	for (int i = 0; i < _scale; i++) {
-		tabS[i] = _symbols[i];
-	}
-
-	//std::cout << "Finished calculating!" << std::endl;
 }
-void rANS::SymbolInformation::toFile(std::string path)
+
+/// <summary>
+/// Save SymbolInformation to .txt file.
+/// </summary>
+/// <param name="path"></param>
+void rANS::SymbolInformation::toFile()
 {
-	std::ofstream file("symbolInformations.txt");
+	if (!std::filesystem::exists("data")) {
+		std::filesystem::create_directory("data");
+	}
+	std::ofstream file("data\\symbolInformations.txt");
 
 	file << "N {" << _n << "}";
 	file << "\nBuffer size {" << bufferSize << "}";
-	//file << "\nScale {" << _scale << "}";
-	//file << "\nMask {" << _mask << "}";
-	//file << "\nD {" << _d << "}";
 	file << "\nRenormalization factor {" << _normalizationFactor << "}";
 	file << "\nRenorm high {" << _renormHigh << "}";
-	//file << "\nRenorm LOW {" << _renormLow << "}";
-	//file << "\nRenorm HIGH {" << _renormHigh << "}";
 
 	//Save alphabet,
 	file << "\nAlphabet {";
@@ -611,14 +529,17 @@ void rANS::SymbolInformation::toFile(std::string path)
 
 	file.close();
 }
+
+/// <summary>
+/// Load SymbolInformation from file.
+/// </summary>
+/// <param name="path">Path of file with symbol information.</param>
+/// <returns>True if operation was succesfull, otherwise false.</returns>
 bool rANS::SymbolInformation::loadSymbolInfoFromFile(std::string path)
 {
 	bool result = false;
 	std::ifstream file(path);
 	if (file.is_open()) {
-		//std::cout << path << " - file opened successfully!" << std::endl;
-
-		//Read symbols from file.
 		std::string dataBuffer = "";
 		std::string temp = "";
 		_alphabet.clear();
@@ -870,8 +791,8 @@ void rANS::SymbolInformation::calculateSymbolsInformation() {
 
 			_reciprocalFreq[i] = (uint32_t)(((1ull << (shift + 31)) + _frequencies[i] - 1) / _frequencies[i]);
 			_reciprocalShift[i] = shift - 1;
-		}
 			_bias[i] = _cumulatives[i];
+		}
 	}
 }
 #pragma endregion
