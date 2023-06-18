@@ -36,3 +36,13 @@ size_t rANS::CompressionDetails::getObjectSize() const
 {
 	return _objectSize;
 }
+
+double rANS::CompressionDetails::CalculateAvg(double* tab, size_t size)
+{
+	double result = 0;
+	for (size_t i = 0; i < size; i++) {
+		result += tab[i];
+	}
+	result /= size;
+	return result;
+}

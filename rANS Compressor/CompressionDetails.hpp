@@ -14,6 +14,8 @@ namespace rANS {
 		double getOperationSpeed() const;
 		size_t getObjectSize() const;
 
+		static double CalculateAvg(double* tab, size_t size);
+
 	private:
 		std::chrono::duration<double> _operationTime;
 		double _operationSpeed;

@@ -1,16 +1,14 @@
 ﻿#include <iostream>
-#include <fstream>
 #include <list>
 #include <string>
-#include <math.h>
-#include <filesystem>
 #include "SymbolInformation.hpp"
 #include "rANSCompressor.hpp"
 #include "Comparer.hpp"
 
 #define rANS_test_FILE_TO_CONSOLE 0
 #define rANS_test_FILE 0
-#define rANS_test_MESSAGE 1
+#define rANS_test_MESSAGE 0
+#define rANS_EXAMPLE 1
 
 #define EXAMPLE_DATA_PATH "D:\\Dev\\rANS Compressor\\rANS Compressor\\data\\"
 
@@ -24,6 +22,81 @@ using namespace rANS;
 int main()
 {
     std::string PATH = EXAMPLE_DATA_PATH;
+#if rANS_EXAMPLE == 1
+    std::string fileName = PAN_TADEUSZ;
+
+    const size_t experiments = 10;
+
+    double encodeSizeTab[experiments] {0,0,0,0,0,0,0,0,0,0};
+    double decodeSizeTab[experiments] {0,0,0,0,0,0,0,0,0,0};
+    double compressionRationTab[experiments] {0,0,0,0,0,0,0,0,0,0};
+    double encodingSpeed[experiments] {0,0,0,0,0,0,0,0,0,0};
+    double decodingSpeed[experiments] {0,0,0,0,0,0,0,0,0,0};
+    double encodingTime[experiments] {0,0,0,0,0,0,0,0,0,0};
+    double decodingTime[experiments] {0,0,0,0,0,0,0,0,0,0};
+
+    SymbolInformation symInfo;
+    symInfo.loadDataFromFile(PATH + fileName);
+
+    uint32_t encodingCode = 0;
+    uint32_t decodingCode = 0;
+
+    for (size_t i = 0; i < experiments; i++) {
+
+        rANSCompressor rAnsCompressor;
+        encodingCode = rAnsCompressor.encodeFile(PATH + fileName);
+        decodingCode = rAnsCompressor.decodeFile(PATH + "encoded", PATH + "symbolInformations.txt");
+
+        std::cout << "--------------- Operation: " << i << "---------------------\n";
+        std::cout << "Encoding code: " << encodingCode << std::endl;
+        std::cout << "Decoding code: " << decodingCode << std::endl;
+        std::cout << std::endl;
+
+        bool result = Comparer::compareFiles(PATH + fileName, PATH + "decoded");
+        std::cout << (result == true ? "File encoded and decoded successfully!\n" : "Something went wrong!\n");
+
+        CompressionDetails encDetails = rAnsCompressor.getEncodingDetails();
+        double encTime = encDetails.getOperationTime();
+        double encSpeed = encDetails.getOperationSpeed();
+        size_t encSize = encDetails.getObjectSize();
+        std::cout << "File: " << fileName << " encoding time: " << encTime << "[s]" << std::endl;
+        std::cout << "File encoding speed: " << encSpeed << "[B/s]" << std::endl;
+        std::cout << "File size after encoding: " << encSize << "[B]" << std::endl;
+        std::cout << std::endl;
+
+        CompressionDetails decDetails = rAnsCompressor.getDecodingDetails();
+        double decTime = decDetails.getOperationTime();
+        double decSpeed = decDetails.getOperationSpeed();
+        size_t decSize = decDetails.getObjectSize();
+        std::cout << "File: " << "encoded.txt" << " decoding time: " << decTime << "[s]" << std::endl;
+        std::cout << "File decoding speed: " << decSpeed << "[B/s]" << std::endl;
+        std::cout << "File size after decoding: " << decSize << "[B]" << std::endl;
+        std::cout << std::endl;
+
+        double fileCompressionRation = (double)decSize / (double)encSize;
+        std::cout << "File compression ratio: " << fileCompressionRation << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+
+        //Save results
+        encodeSizeTab[i] = encSize;
+        decodeSizeTab[i] = decSize;
+        compressionRationTab[i] = fileCompressionRation;
+        encodingSpeed[i] = encSpeed;
+        decodingSpeed[i] = decSpeed;
+        encodingTime[i] = encTime;
+        decodingTime[i] = decTime;
+    }
+
+    //Results
+    std::cout << "--------------- Results ---------------------\n";
+    std::cout << "Avg encoding time: " << CompressionDetails::CalculateAvg(encodingTime, experiments) <<"[s]" << std::endl;
+    std::cout << "Avg decoding time: " << CompressionDetails::CalculateAvg(decodingTime, experiments) << "[s]" << std::endl;
+    std::cout << "Avg encoding speed: " << CompressionDetails::CalculateAvg(encodingSpeed, experiments) << "[B/s]" << std::endl;
+    std::cout << "Avg decoding speed: " << CompressionDetails::CalculateAvg(decodingSpeed, experiments) << "[B/s]" << std::endl;
+    std::cout << "Avg compression ratio: " << CompressionDetails::CalculateAvg(compressionRationTab, experiments) << std::endl;
+
+#endif
 
 #if rANS_test_FILE == 1
 
