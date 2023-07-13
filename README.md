@@ -1,7 +1,7 @@
 # Introduction
-**rANS** (renormalization-based Asymmetric Numerical Systems) compression is a class of entropy coding algorithms that achieves high compression ratios by encoding data using adaptive probability distributions. The rANS algorithm, developed by **Jarek Duda**, is a variant of the Asymmetric Numeral Systems (ANS) family of entropy encoding techniques.It has gained significant attention in the field of lossless data compression due to its simplicity, efficiency, and competitive compression performance compared to other algorithms.
+**rANS** (renormalization-based Asymmetric Numerical Systems) compression is a class of entropy coding algorithms that achieves high compression ratios by encoding data using adaptive probability distributions. The rANS algorithm, developed by **Jarek Duda**, is a variant of the Asymmetric Numeral Systems (ANS) family of entropy encoding techniques.It has gained significant attention in the field of lossless data compression due to its simplicity, efficiency, and competitive compression performance compared to other algorithms. This implementation of rANS compression is not efficient, and done for educational purposes.
 
-Techniques used in this project are based on implementation and approach of **Fabian ìrygî Giesen**'s methods shown in his ryg_rans repository which can be found under:
+Techniques used in this project are based on implementation and approach of **Fabian ‚Äúryg‚Äù Giesen**'s methods shown in his ryg_rans repository which can be found under:
 * [https://github.com/rygorous/ryg_rans](https://github.com/rygorous/ryg_rans)
 
 ### Sources used to create this project
@@ -13,12 +13,12 @@ by **Kedar Tatwawadi**](https://kedartatwawadi.github.io/post--ANS/)
 This project aims to provide a implementation of rANS compression techniques, along with supporting utilities and tools to facilitate experimentation and evaluation.
 
 # Content
-* Experiment - compressing ìPan Tadeuszî book by Adam Mickiewicz.
+* Experiment - compressing ‚ÄúPan Tadeusz‚Äù book by Adam Mickiewicz.
 * Example code - how to use rANS compressor.
 * Classes overview - description of classes and its functionalities.
 
 # Example Compression of "Pan Taduesz" Book
-As part of an experiment, I ran the rANS compressor on the ìPan Tadeuszî book written by Adam Mickiewicz. The experiment was repeated 10 times, and the average results were as follows:
+As part of an experiment, I ran the rANS compressor on the ‚ÄúPan Tadeusz‚Äù book written by Adam Mickiewicz. The experiment was repeated 10 times, and the average results were as follows:
 
 * Average Encoding Time: 0.414653 [s]
 
